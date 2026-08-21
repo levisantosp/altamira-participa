@@ -1,0 +1,22 @@
+{
+  "name": "altamira-participa",
+  "keywords": [],
+  "license": "AGPL-3.0-only",
+  "author": "",
+  "scripts": {
+    "fmt": "oxfmt",
+    "lint": "oxlint"
+  },
+  "devDependencies": {
+    "oxfmt": "^0.64.0",
+    "oxlint": "^1.79.0",
+    "typescript": "^7.0.2"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^11.22.0",
+      "onFail": "download"
+    }
+  }
+}
