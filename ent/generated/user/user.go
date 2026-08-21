@@ -52,10 +52,8 @@ func ValidColumn(column string) bool {
 	return false
 }
 
-var (
-	// DefaultIsAdmin holds the default value on creation for the "is_admin" field.
-	DefaultIsAdmin bool
-)
+// DefaultIsAdmin holds the default value on creation for the "is_admin" field.
+var DefaultIsAdmin bool
 
 // OrderOption defines the ordering options for the User queries.
 type OrderOption func(*sql.Selector)
@@ -98,6 +96,7 @@ func ByAccounts(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newAccountsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
 func newAccountsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),

@@ -47,7 +47,9 @@ func SignInWithEmail(
 		WithUser().
 		Only(ctx)
 	if err != nil {
-		return nil, huma.Error404NotFound("Usuário não encontrado. Verifique o e-mail.")
+		return nil, huma.Error404NotFound(
+			"Usuário não encontrado. Verifique o e-mail.",
+		)
 	}
 
 	ok := utils.VerifyPassword(input.Body.Password, account.Password)
