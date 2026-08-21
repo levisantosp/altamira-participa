@@ -14,6 +14,8 @@ type TEnv struct {
 	DatabaseURL    string   `zog:"DATABASE_URL"`
 	RedisAddr      string   `zog:"REDIS_ADDR"`
 	TrustedOrigins []string `zog:"TRUSTED_ORIGINS"`
+	DashboardURL   string   `zog:"DASHBOARD_URL"`
+	WebURL         string   `zog:"WEB_URL"`
 }
 
 var Env TEnv
@@ -35,6 +37,8 @@ func LoadEnv() {
 			},
 			zog.Slice(zog.String().URL().Required()),
 		),
+		"DashboardURL": zog.String().URL(),
+		"WebURL":       zog.String().URL(),
 	})
 
 	err := schema.Parse(zenv.NewDataProvider(), &Env)
