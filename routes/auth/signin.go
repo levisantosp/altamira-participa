@@ -32,7 +32,7 @@ type Session struct {
 	IsAdmin     bool   `json:"isAdmin"`
 }
 
-type SignInWithEmailOutput struct {
+type SignInOutput struct {
 	Status    int           `json:"-"`
 	Location  string        `header:"Location"`
 	SetCookie []http.Cookie `header:"Set-Cookie"`
@@ -41,7 +41,7 @@ type SignInWithEmailOutput struct {
 func SignInWithEmail(
 	ctx context.Context,
 	input *SignInWithEmailInput,
-) (*SignInWithEmailOutput, error) {
+) (*SignInOutput, error) {
 	account, err := db.Client.Account.Query().
 		Where(account.HasUserWith(user.EmailEQ(input.Body.Email))).
 		WithUser().
@@ -91,7 +91,7 @@ func SignInWithEmail(
 		Path:     "/",
 	}
 
-	return &SignInWithEmailOutput{
+	return &SignInOutput{
 		Status:    http.StatusFound,
 		Location:  utils.Env.WebURL,
 		SetCookie: []http.Cookie{sessionCookie},
