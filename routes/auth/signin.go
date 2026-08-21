@@ -19,8 +19,8 @@ import (
 
 type SignInWithEmailInput struct {
 	Body struct {
-		Email    string
-		Password string
+		Email    string `json:"email" format:"email" required:"true"`
+		Password string `json:"password" minLength:"8" maxLength:"72" required:"true"`
 	}
 }
 
@@ -34,8 +34,8 @@ type Session struct {
 
 type SignInOutput struct {
 	Status    int           `json:"-"`
-	Location  string        `header:"Location"`
-	SetCookie []http.Cookie `header:"Set-Cookie"`
+	Location  string        `         header:"Location"`
+	SetCookie []http.Cookie `         header:"Set-Cookie"`
 }
 
 func SignInWithEmail(
