@@ -33,10 +33,8 @@ func ValidColumn(column string) bool {
 	return false
 }
 
-var (
-	// DefaultIsAdmin holds the default value on creation for the "is_admin" field.
-	DefaultIsAdmin bool
-)
+// DefaultIsAdmin holds the default value on creation for the "is_admin" field.
+var DefaultIsAdmin bool
 
 // OrderOption defines the ordering options for the User queries.
 type OrderOption func(*sql.Selector)
