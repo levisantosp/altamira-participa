@@ -10,10 +10,10 @@ import (
 var (
 	// AccountsColumns holds the columns for the "accounts" table.
 	AccountsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeInt64, Increment: true},
 		{Name: "provider", Type: field.TypeEnum, Enums: []string{"google", "email"}},
 		{Name: "password", Type: field.TypeString, Nullable: true},
-		{Name: "user_accounts", Type: field.TypeInt, Nullable: true},
+		{Name: "user_accounts", Type: field.TypeInt64},
 	}
 	// AccountsTable holds the schema information for the "accounts" table.
 	AccountsTable = &schema.Table{
@@ -25,13 +25,13 @@ var (
 				Symbol:     "accounts_users_accounts",
 				Columns:    []*schema.Column{AccountsColumns[3]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeInt64, Increment: true},
 		{Name: "username", Type: field.TypeString, Unique: true},
 		{Name: "display_name", Type: field.TypeString},
 		{Name: "is_admin", Type: field.TypeBool, Default: false},

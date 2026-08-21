@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
@@ -14,6 +15,7 @@ type Account struct {
 // Fields of the Account.
 func (Account) Fields() []ent.Field {
 	return []ent.Field{
+		field.Int64("id"),
 		field.Enum("provider").Values("google", "email"),
 		field.String("password").Sensitive().Optional(),
 	}
@@ -22,6 +24,10 @@ func (Account) Fields() []ent.Field {
 // Edges of the Account.
 func (Account) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("user", User.Type).Ref("accounts").Unique(),
+		edge.From("user", User.Type).
+			Ref("accounts").
+			Unique().
+			Required().
+			Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }

@@ -40,17 +40,15 @@ func (_c *AccountCreate) SetNillablePassword(v *string) *AccountCreate {
 	return _c
 }
 
-// SetUserID sets the "user" edge to the User entity by ID.
-func (_c *AccountCreate) SetUserID(id int) *AccountCreate {
-	_c.mutation.SetUserID(id)
+// SetID sets the "id" field.
+func (_c *AccountCreate) SetID(v int64) *AccountCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (_c *AccountCreate) SetNillableUserID(id *int) *AccountCreate {
-	if id != nil {
-		_c = _c.SetUserID(*id)
-	}
+// SetUserID sets the "user" edge to the User entity by ID.
+func (_c *AccountCreate) SetUserID(id int64) *AccountCreate {
+	_c.mutation.SetUserID(id)
 	return _c
 }
 
@@ -101,6 +99,9 @@ func (_c *AccountCreate) check() error {
 			return &ValidationError{Name: "provider", err: fmt.Errorf(`generated: validator failed for field "Account.provider": %w`, err)}
 		}
 	}
+	if len(_c.mutation.UserIDs()) == 0 {
+		return &ValidationError{Name: "user", err: errors.New(`generated: missing required edge "Account.user"`)}
+	}
 	return nil
 }
 
@@ -115,8 +116,10 @@ func (_c *AccountCreate) sqlSave(ctx context.Context) (*Account, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != _node.ID {
+		id := _spec.ID.Value.(int64)
+		_node.ID = int64(id)
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
@@ -125,8 +128,12 @@ func (_c *AccountCreate) sqlSave(ctx context.Context) (*Account, error) {
 func (_c *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Account{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(account.Table, sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(account.Table, sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt64))
 	)
+	if id, ok := _c.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
 	if value, ok := _c.mutation.Provider(); ok {
 		_spec.SetField(account.FieldProvider, field.TypeEnum, value)
 		_node.Provider = value
@@ -143,7 +150,7 @@ func (_c *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 			Columns: []string{account.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -199,9 +206,9 @@ func (_c *AccountCreateBulk) Save(ctx context.Context) ([]*Account, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
+				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
 					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
+					nodes[i].ID = int64(id)
 				}
 				mutation.done = true
 				return nodes[i], nil

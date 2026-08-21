@@ -63,16 +63,8 @@ func (_u *AccountUpdate) ClearPassword() *AccountUpdate {
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (_u *AccountUpdate) SetUserID(id int) *AccountUpdate {
+func (_u *AccountUpdate) SetUserID(id int64) *AccountUpdate {
 	_u.mutation.SetUserID(id)
-	return _u
-}
-
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (_u *AccountUpdate) SetNillableUserID(id *int) *AccountUpdate {
-	if id != nil {
-		_u = _u.SetUserID(*id)
-	}
 	return _u
 }
 
@@ -126,6 +118,9 @@ func (_u *AccountUpdate) check() error {
 			return &ValidationError{Name: "provider", err: fmt.Errorf(`generated: validator failed for field "Account.provider": %w`, err)}
 		}
 	}
+	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
+		return errors.New(`generated: clearing a required unique edge "Account.user"`)
+	}
 	return nil
 }
 
@@ -133,7 +128,7 @@ func (_u *AccountUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(account.Table, account.Columns, sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(account.Table, account.Columns, sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt64))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -158,7 +153,7 @@ func (_u *AccountUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{account.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -171,7 +166,7 @@ func (_u *AccountUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{account.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -234,16 +229,8 @@ func (_u *AccountUpdateOne) ClearPassword() *AccountUpdateOne {
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (_u *AccountUpdateOne) SetUserID(id int) *AccountUpdateOne {
+func (_u *AccountUpdateOne) SetUserID(id int64) *AccountUpdateOne {
 	_u.mutation.SetUserID(id)
-	return _u
-}
-
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (_u *AccountUpdateOne) SetNillableUserID(id *int) *AccountUpdateOne {
-	if id != nil {
-		_u = _u.SetUserID(*id)
-	}
 	return _u
 }
 
@@ -310,6 +297,9 @@ func (_u *AccountUpdateOne) check() error {
 			return &ValidationError{Name: "provider", err: fmt.Errorf(`generated: validator failed for field "Account.provider": %w`, err)}
 		}
 	}
+	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
+		return errors.New(`generated: clearing a required unique edge "Account.user"`)
+	}
 	return nil
 }
 
@@ -317,7 +307,7 @@ func (_u *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err er
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(account.Table, account.Columns, sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(account.Table, account.Columns, sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt64))
 	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`generated: missing "Account.id" for update`)}
@@ -359,7 +349,7 @@ func (_u *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err er
 			Columns: []string{account.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -372,7 +362,7 @@ func (_u *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err er
 			Columns: []string{account.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {

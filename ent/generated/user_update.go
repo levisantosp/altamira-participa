@@ -85,14 +85,14 @@ func (_u *UserUpdate) SetNillableEmail(v *string) *UserUpdate {
 }
 
 // AddAccountIDs adds the "accounts" edge to the Account entity by IDs.
-func (_u *UserUpdate) AddAccountIDs(ids ...int) *UserUpdate {
+func (_u *UserUpdate) AddAccountIDs(ids ...int64) *UserUpdate {
 	_u.mutation.AddAccountIDs(ids...)
 	return _u
 }
 
 // AddAccounts adds the "accounts" edges to the Account entity.
 func (_u *UserUpdate) AddAccounts(v ...*Account) *UserUpdate {
-	ids := make([]int, len(v))
+	ids := make([]int64, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -111,14 +111,14 @@ func (_u *UserUpdate) ClearAccounts() *UserUpdate {
 }
 
 // RemoveAccountIDs removes the "accounts" edge to Account entities by IDs.
-func (_u *UserUpdate) RemoveAccountIDs(ids ...int) *UserUpdate {
+func (_u *UserUpdate) RemoveAccountIDs(ids ...int64) *UserUpdate {
 	_u.mutation.RemoveAccountIDs(ids...)
 	return _u
 }
 
 // RemoveAccounts removes "accounts" edges to Account entities.
 func (_u *UserUpdate) RemoveAccounts(v ...*Account) *UserUpdate {
-	ids := make([]int, len(v))
+	ids := make([]int64, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -153,7 +153,7 @@ func (_u *UserUpdate) ExecX(ctx context.Context) {
 }
 
 func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
-	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt64))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -181,7 +181,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.AccountsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -194,7 +194,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.AccountsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -210,7 +210,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.AccountsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -295,14 +295,14 @@ func (_u *UserUpdateOne) SetNillableEmail(v *string) *UserUpdateOne {
 }
 
 // AddAccountIDs adds the "accounts" edge to the Account entity by IDs.
-func (_u *UserUpdateOne) AddAccountIDs(ids ...int) *UserUpdateOne {
+func (_u *UserUpdateOne) AddAccountIDs(ids ...int64) *UserUpdateOne {
 	_u.mutation.AddAccountIDs(ids...)
 	return _u
 }
 
 // AddAccounts adds the "accounts" edges to the Account entity.
 func (_u *UserUpdateOne) AddAccounts(v ...*Account) *UserUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]int64, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -321,14 +321,14 @@ func (_u *UserUpdateOne) ClearAccounts() *UserUpdateOne {
 }
 
 // RemoveAccountIDs removes the "accounts" edge to Account entities by IDs.
-func (_u *UserUpdateOne) RemoveAccountIDs(ids ...int) *UserUpdateOne {
+func (_u *UserUpdateOne) RemoveAccountIDs(ids ...int64) *UserUpdateOne {
 	_u.mutation.RemoveAccountIDs(ids...)
 	return _u
 }
 
 // RemoveAccounts removes "accounts" edges to Account entities.
 func (_u *UserUpdateOne) RemoveAccounts(v ...*Account) *UserUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]int64, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -376,7 +376,7 @@ func (_u *UserUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
-	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt64))
 	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`generated: missing "User.id" for update`)}
@@ -421,7 +421,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.AccountsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -434,7 +434,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.AccountsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -450,7 +450,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.AccountsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {

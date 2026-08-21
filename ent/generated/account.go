@@ -16,7 +16,7 @@ import (
 type Account struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID int64 `json:"id,omitempty"`
 	// Provider holds the value of the "provider" field.
 	Provider account.Provider `json:"provider,omitempty"`
 	// Password holds the value of the "password" field.
@@ -24,7 +24,7 @@ type Account struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AccountQuery when eager-loading is set.
 	Edges         AccountEdges `json:"edges"`
-	user_accounts *int
+	user_accounts *int64
 	selectValues  sql.SelectValues
 }
 
@@ -79,7 +79,7 @@ func (_m *Account) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			_m.ID = int(value.Int64)
+			_m.ID = int64(value.Int64)
 		case account.FieldProvider:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field provider", values[i])
@@ -96,8 +96,8 @@ func (_m *Account) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field user_accounts", value)
 			} else if value.Valid {
-				_m.user_accounts = new(int)
-				*_m.user_accounts = int(value.Int64)
+				_m.user_accounts = new(int64)
+				*_m.user_accounts = int64(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
