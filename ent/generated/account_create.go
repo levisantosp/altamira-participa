@@ -13,61 +13,64 @@ import (
 	"github.com/levisantosp/altamira-participa/ent/generated/user"
 )
 
-// UserCreate is the builder for creating a User entity.
-type UserCreate struct {
+// AccountCreate is the builder for creating a Account entity.
+type AccountCreate struct {
 	config
-	mutation *UserMutation
+	mutation *AccountMutation
 	hooks    []Hook
 }
 
-// SetIsAdmin sets the "is_admin" field.
-func (_c *UserCreate) SetIsAdmin(v bool) *UserCreate {
-	_c.mutation.SetIsAdmin(v)
+// SetProvider sets the "provider" field.
+func (_c *AccountCreate) SetProvider(v account.Provider) *AccountCreate {
+	_c.mutation.SetProvider(v)
 	return _c
 }
 
-// SetNillableIsAdmin sets the "is_admin" field if the given value is not nil.
-func (_c *UserCreate) SetNillableIsAdmin(v *bool) *UserCreate {
+// SetPassword sets the "password" field.
+func (_c *AccountCreate) SetPassword(v string) *AccountCreate {
+	_c.mutation.SetPassword(v)
+	return _c
+}
+
+// SetNillablePassword sets the "password" field if the given value is not nil.
+func (_c *AccountCreate) SetNillablePassword(v *string) *AccountCreate {
 	if v != nil {
-		_c.SetIsAdmin(*v)
+		_c.SetPassword(*v)
 	}
 	return _c
 }
 
-// SetEmail sets the "email" field.
-func (_c *UserCreate) SetEmail(v string) *UserCreate {
-	_c.mutation.SetEmail(v)
+// SetUserID sets the "user" edge to the User entity by ID.
+func (_c *AccountCreate) SetUserID(id int) *AccountCreate {
+	_c.mutation.SetUserID(id)
 	return _c
 }
 
-// AddAccountIDs adds the "accounts" edge to the Account entity by IDs.
-func (_c *UserCreate) AddAccountIDs(ids ...int) *UserCreate {
-	_c.mutation.AddAccountIDs(ids...)
-	return _c
-}
-
-// AddAccounts adds the "accounts" edges to the Account entity.
-func (_c *UserCreate) AddAccounts(v ...*Account) *UserCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
+// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
+func (_c *AccountCreate) SetNillableUserID(id *int) *AccountCreate {
+	if id != nil {
+		_c = _c.SetUserID(*id)
 	}
-	return _c.AddAccountIDs(ids...)
+	return _c
 }
 
-// Mutation returns the UserMutation object of the builder.
-func (_c *UserCreate) Mutation() *UserMutation {
+// SetUser sets the "user" edge to the User entity.
+func (_c *AccountCreate) SetUser(v *User) *AccountCreate {
+	return _c.SetUserID(v.ID)
+}
+
+// Mutation returns the AccountMutation object of the builder.
+func (_c *AccountCreate) Mutation() *AccountMutation {
 	return _c.mutation
 }
 
-// Save creates the User in the database.
-func (_c *UserCreate) Save(ctx context.Context) (*User, error) {
-	_c.defaults()
+// Save creates the Account in the database.
+func (_c *AccountCreate) Save(ctx context.Context) (*Account, error) {
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *UserCreate) SaveX(ctx context.Context) *User {
+func (_c *AccountCreate) SaveX(ctx context.Context) *Account {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -76,38 +79,32 @@ func (_c *UserCreate) SaveX(ctx context.Context) *User {
 }
 
 // Exec executes the query.
-func (_c *UserCreate) Exec(ctx context.Context) error {
+func (_c *AccountCreate) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *UserCreate) ExecX(ctx context.Context) {
+func (_c *AccountCreate) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *UserCreate) defaults() {
-	if _, ok := _c.mutation.IsAdmin(); !ok {
-		v := user.DefaultIsAdmin
-		_c.mutation.SetIsAdmin(v)
-	}
-}
-
 // check runs all checks and user-defined validators on the builder.
-func (_c *UserCreate) check() error {
-	if _, ok := _c.mutation.IsAdmin(); !ok {
-		return &ValidationError{Name: "is_admin", err: errors.New(`generated: missing required field "User.is_admin"`)}
+func (_c *AccountCreate) check() error {
+	if _, ok := _c.mutation.Provider(); !ok {
+		return &ValidationError{Name: "provider", err: errors.New(`generated: missing required field "Account.provider"`)}
 	}
-	if _, ok := _c.mutation.Email(); !ok {
-		return &ValidationError{Name: "email", err: errors.New(`generated: missing required field "User.email"`)}
+	if v, ok := _c.mutation.Provider(); ok {
+		if err := account.ProviderValidator(v); err != nil {
+			return &ValidationError{Name: "provider", err: fmt.Errorf(`generated: validator failed for field "Account.provider": %w`, err)}
+		}
 	}
 	return nil
 }
 
-func (_c *UserCreate) sqlSave(ctx context.Context) (*User, error) {
+func (_c *AccountCreate) sqlSave(ctx context.Context) (*Account, error) {
 	if err := _c.check(); err != nil {
 		return nil, err
 	}
@@ -125,59 +122,59 @@ func (_c *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	return _node, nil
 }
 
-func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
+func (_c *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 	var (
-		_node = &User{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(user.Table, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
+		_node = &Account{config: _c.config}
+		_spec = sqlgraph.NewCreateSpec(account.Table, sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt))
 	)
-	if value, ok := _c.mutation.IsAdmin(); ok {
-		_spec.SetField(user.FieldIsAdmin, field.TypeBool, value)
-		_node.IsAdmin = value
+	if value, ok := _c.mutation.Provider(); ok {
+		_spec.SetField(account.FieldProvider, field.TypeEnum, value)
+		_node.Provider = value
 	}
-	if value, ok := _c.mutation.Email(); ok {
-		_spec.SetField(user.FieldEmail, field.TypeString, value)
-		_node.Email = value
+	if value, ok := _c.mutation.Password(); ok {
+		_spec.SetField(account.FieldPassword, field.TypeString, value)
+		_node.Password = value
 	}
-	if nodes := _c.mutation.AccountsIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.AccountsTable,
-			Columns: []string{user.AccountsColumn},
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   account.UserTable,
+			Columns: []string{account.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.user_accounts = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
 
-// UserCreateBulk is the builder for creating many User entities in bulk.
-type UserCreateBulk struct {
+// AccountCreateBulk is the builder for creating many Account entities in bulk.
+type AccountCreateBulk struct {
 	config
 	err      error
-	builders []*UserCreate
+	builders []*AccountCreate
 }
 
-// Save creates the User entities in the database.
-func (_c *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
+// Save creates the Account entities in the database.
+func (_c *AccountCreateBulk) Save(ctx context.Context) ([]*Account, error) {
 	if _c.err != nil {
 		return nil, _c.err
 	}
 	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
-	nodes := make([]*User, len(_c.builders))
+	nodes := make([]*Account, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
-			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				mutation, ok := m.(*UserMutation)
+				mutation, ok := m.(*AccountMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
@@ -224,7 +221,7 @@ func (_c *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_c *UserCreateBulk) SaveX(ctx context.Context) []*User {
+func (_c *AccountCreateBulk) SaveX(ctx context.Context) []*Account {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -233,13 +230,13 @@ func (_c *UserCreateBulk) SaveX(ctx context.Context) []*User {
 }
 
 // Exec executes the query.
-func (_c *UserCreateBulk) Exec(ctx context.Context) error {
+func (_c *AccountCreateBulk) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *UserCreateBulk) ExecX(ctx context.Context) {
+func (_c *AccountCreateBulk) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
