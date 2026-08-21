@@ -1,11 +1,18 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["typescript", "unicorn", "oxc"],
+  "plugins": ["typescript", "unicorn", "oxc", "nextjs", "react"],
   "categories": {
-    "correctness": "error"
+    "correctness": "error",
+    "perf": "warn"
   },
-  "rules": {},
+  "rules": {
+    "typescript/no-floating-promises": "error",
+    "eqeqeq": "error"
+  },
   "env": {
     "builtin": true
+  },
+  "options": {
+    "typeAware": true
   }
 }
