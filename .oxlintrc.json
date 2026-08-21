@@ -1,5 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "ignorePatterns": ["ui/**"],
   "plugins": ["typescript", "unicorn", "oxc", "nextjs", "react"],
   "categories": {
     "correctness": "error",
@@ -14,5 +15,13 @@
   },
   "options": {
     "typeAware": true
-  }
+  },
+  "overrides": [
+    {
+      "files": ["./admin/**"],
+      "rules": {
+        "nextjs/no-img-element": "off"
+      }
+    }
+  ]
 }
