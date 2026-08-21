@@ -2,9 +2,9 @@ dev:
 	go run main.go
 
 fmt:
-	go tool gofumpt -l -w .
-	go tool golines -m 80 -w .
-	go tool goimports -l -w .
+	find . -path './pg' -prune -o -type f -name '*.go' -exec go tool gofumpt -w {} +
+	find . -path './pg' -prune -o -type f -name '*.go' -exec go tool golines -m 80 -w {} +
+	find . -path './pg' -prune -o -type f -name '*.go' -exec go tool goimports -w {} +
 
 create-schema:
 ifndef name
