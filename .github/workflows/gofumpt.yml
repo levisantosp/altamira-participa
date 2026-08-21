@@ -1,0 +1,60 @@
+name: go fmt check
+on:
+  push:
+    branches: ['**']
+    paths:
+      - '**.go'
+      - 'go.mod'
+      - 'go.sum'
+      - 'Makefile'
+  pull_request:
+    branches: ['**']
+    paths:
+      - '**.go'
+      - 'go.mod'
+      - 'go.sum'
+      - 'Makefile'
+
+jobs:
+  fmt:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: checkout code
+        uses: actions/checkout@main
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref || github.ref }}
+          persist-credentials: true
+
+      - name: setup go
+        uses: actions/setup-go@main
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: run go fmt autofix
+        if: github.event_name == 'push'
+        run: make fmt
+
+      - name: commit changes
+        if: github.event_name == 'push'
+        uses: stefanzweifel/git-auto-commit-action@master
+        with:
+          commit_message: |
+            style: run go fmt autofix
+
+            Co-authored-by: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
+          commit_user_name: github-actions[bot]
+          commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
+          commit_author: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+
+      - name: check formatting
+        if: github.event_name == 'pull_request'
+        run: |
+          make fmt
+          git diff --exit-code --stat
