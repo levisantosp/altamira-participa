@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --port 5174",
     "build": "oxlint && next build",
-    "start": "next start",
+    "start": "next start --port 5174",
     "fmt": "oxfmt",
     "lint": "oxlint",
     "check": "tsc"
