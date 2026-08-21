@@ -79,7 +79,10 @@ func SignInWithEmail(
 	}
 
 	ttl := 7 * 24 * time.Hour
-	redis.Client.Set(ctx, "session:"+sessionId, session, ttl)
+	err = redis.Client.Set(ctx, "session:"+sessionId, session, ttl).Err()
+	if err != nil {
+		return nil, huma.Error500InternalServerError("Internal Server Error")
+	}
 
 	sessionCookie := http.Cookie{
 		Name:     "session",
