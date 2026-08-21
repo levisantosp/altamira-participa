@@ -10,7 +10,7 @@ import (
 
 type TEnv struct {
 	DatabaseURL string `zog:"DATABASE_URL"`
-	RedisAddr string `zog:"REDIS_ADDR"`
+	RedisAddr   string `zog:"REDIS_ADDR"`
 }
 
 var Env TEnv
@@ -20,7 +20,7 @@ func LoadEnv() {
 
 	schema := zog.Struct(zog.Shape{
 		"DatabaseURL": zog.String().URL().Required(),
-		"RedisAddr": zog.String().URL().Required(),
+		"RedisAddr":   zog.String().Required(),
 	})
 
 	err := schema.Parse(zenv.NewDataProvider(), Env)
