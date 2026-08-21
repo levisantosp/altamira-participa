@@ -10,7 +10,7 @@ create-schema:
 ifndef name
 	$(error name is required. Usage: make create-schema name=SchemaName)
 endif
-	go run entgo.io/ent/cmd/ent new $(name)
+	go tool ent new $(name)
 
 generate:
 	rm -rf ent/generated && go generate ./ent/...
