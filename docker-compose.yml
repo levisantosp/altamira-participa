@@ -1,0 +1,51 @@
+services:
+  redis:
+    image: redis:latest
+    container_name: redis-altamira-participa
+    restart: unless-stopped
+    network_mode: host
+    command: redis-server --bind localhost --port 6380
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD-SHELL', 'redis-cli replicaof no one && redis-cli ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  pg:
+    image: postgres:18
+    container_name: pg-altamira-participa
+    restart: always
+    network_mode: host
+    shm_size: 2gb
+
+    environment:
+      - PGDATA=/var/lib/postgresql/18/data
+    env_file:
+      - .env
+    volumes:
+      - ./pg/data:/var/lib/postgresql/18/data
+      - ./pg/backup:/var/lib/postgresql/18/backup
+
+    command: >
+      postgres
+      -p 5433
+      -c shared_buffers=1536MB
+      -c work_mem=4MB
+      -c effective_cache_size=5GB
+      -c random_page_cost=1.1
+
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'PGPASSWORD=$${POSTGRES_PASSWORD} pg_isready -h localhost -U $${POSTGRES_USER}'
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  redis_data:
