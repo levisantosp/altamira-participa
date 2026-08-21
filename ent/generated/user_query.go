@@ -299,12 +299,12 @@ func (_q *UserQuery) WithAccounts(opts ...func(*AccountQuery)) *UserQuery {
 // Example:
 //
 //	var v []struct {
-//		IsAdmin bool `json:"is_admin,omitempty"`
+//		Username string `json:"username,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.User.Query().
-//		GroupBy(user.FieldIsAdmin).
+//		GroupBy(user.FieldUsername).
 //		Aggregate(generated.Count()).
 //		Scan(ctx, &v)
 func (_q *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
@@ -322,11 +322,11 @@ func (_q *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 // Example:
 //
 //	var v []struct {
-//		IsAdmin bool `json:"is_admin,omitempty"`
+//		Username string `json:"username,omitempty"`
 //	}
 //
 //	client.User.Query().
-//		Select(user.FieldIsAdmin).
+//		Select(user.FieldUsername).
 //		Scan(ctx, &v)
 func (_q *UserQuery) Select(fields ...string) *UserSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
