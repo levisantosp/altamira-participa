@@ -23,7 +23,7 @@ func LoadEnv() {
 		"RedisAddr":   zog.String().Required(),
 	})
 
-	err := schema.Parse(zenv.NewDataProvider(), Env)
+	err := schema.Parse(zenv.NewDataProvider(), &Env)
 	if err != nil {
 		log.Fatal(err)
 	}
