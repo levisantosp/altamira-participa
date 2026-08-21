@@ -4,10 +4,13 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/danielgtaylor/huma/v2"
+	"github.com/danielgtaylor/huma/v2/adapters/humachi"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/levisantosp/altamira-participa/db"
+	"github.com/levisantosp/altamira-participa/routes/auth"
 	"github.com/levisantosp/altamira-participa/utils"
 )
 
@@ -34,6 +37,10 @@ func main() {
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello, world!"))
 	})
+
+	api := humachi.New(r, huma.DefaultConfig("api docs", "0.0.0"))
+
+	auth.AuthRoutes(api)
 
 	log.Println("HTTP server running at http://localhost:3333")
 	http.ListenAndServe(":3333", r)
