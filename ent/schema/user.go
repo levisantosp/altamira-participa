@@ -14,6 +14,7 @@ type User struct {
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
+		field.Int64("id"),
 		field.String("username").Unique(),
 		field.String("display_name"),
 		field.Bool("is_admin").Default(false),
