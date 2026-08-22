@@ -9,6 +9,8 @@ on:
       - 'LICENSE'
       - '.github/**'
       - '**.go'
+      - '**.mod'
+      - '**.sum'
   pull_request:
     branches: ['**']
     paths-ignore:
@@ -18,6 +20,8 @@ on:
       - 'LICENSE'
       - '.github/**'
       - '**.go'
+      - '**.mod'
+      - '**.sum'
 
 jobs:
   format-and-lint:
