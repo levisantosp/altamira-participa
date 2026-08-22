@@ -3,6 +3,7 @@
 package user
 
 import (
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 )
@@ -52,8 +53,16 @@ func ValidColumn(column string) bool {
 	return false
 }
 
-// DefaultIsAdmin holds the default value on creation for the "is_admin" field.
-var DefaultIsAdmin bool
+// Note that the variables below are initialized by the runtime
+// package on the initialization of the application. Therefore,
+// it should be imported in the main as follows:
+//
+//	import _ "github.com/levisantosp/altamira-participa/ent/generated/runtime"
+var (
+	Hooks [1]ent.Hook
+	// DefaultIsAdmin holds the default value on creation for the "is_admin" field.
+	DefaultIsAdmin bool
+)
 
 // OrderOption defines the ordering options for the User queries.
 type OrderOption func(*sql.Selector)
@@ -96,7 +105,6 @@ func ByAccounts(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newAccountsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-
 func newAccountsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),

@@ -2,19 +2,4 @@
 
 package generated
 
-import (
-	"github.com/levisantosp/altamira-participa/ent/generated/user"
-	"github.com/levisantosp/altamira-participa/ent/schema"
-)
-
-// The init function reads all schema descriptors with runtime code
-// (default values, validators, hooks and policies) and stitches it
-// to their package variables.
-func init() {
-	userFields := schema.User{}.Fields()
-	_ = userFields
-	// userDescIsAdmin is the schema descriptor for is_admin field.
-	userDescIsAdmin := userFields[3].Descriptor()
-	// user.DefaultIsAdmin holds the default value on creation for the is_admin field.
-	user.DefaultIsAdmin = userDescIsAdmin.Default.(bool)
-}
+// The schema-stitching logic is generated in github.com/levisantosp/altamira-participa/ent/generated/runtime/runtime.go

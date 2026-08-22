@@ -1,9 +1,14 @@
 package schema
 
 import (
+	"context"
+	"strings"
+
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/levisantosp/altamira-participa/ent/generated"
+	"github.com/levisantosp/altamira-participa/ent/generated/hook"
 )
 
 // User holds the schema definition for the User entity.
@@ -26,5 +31,27 @@ func (User) Fields() []ent.Field {
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("accounts", Account.Type),
+	}
+}
+
+func (User) Hooks() []ent.Hook {
+	return []ent.Hook{
+		hook.On(func(m ent.Mutator) ent.Mutator {
+			return hook.UserFunc(
+				func(ctx context.Context, um *generated.UserMutation) (generated.Value, error) {
+					if email, ok := um.Email(); ok {
+						um.SetEmail(strings.ToLower(strings.TrimSpace(email)))
+					}
+
+					if username, ok := um.Username(); ok {
+						um.SetUsername(
+							strings.ToLower(strings.TrimSpace(username)),
+						)
+					}
+
+					return m.Mutate(ctx, um)
+				},
+			)
+		}, ent.OpCreate|ent.OpUpdate|ent.OpUpdateOne),
 	}
 }

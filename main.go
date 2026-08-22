@@ -12,6 +12,8 @@ import (
 	"github.com/levisantosp/altamira-participa/db"
 	"github.com/levisantosp/altamira-participa/routes/auth"
 	"github.com/levisantosp/altamira-participa/utils"
+
+	_ "github.com/levisantosp/altamira-participa/ent/generated/runtime"
 )
 
 func main() {
