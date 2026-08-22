@@ -2,26 +2,24 @@ name: oxc format and check
 on:
   push:
     branches: ['**']
-    paths-ignore:
-      - '**.md'
-      - '.gitignore'
-      - 'README*'
-      - 'LICENSE'
-      - '.github/**'
-      - '**.go'
-      - '**.mod'
-      - '**.sum'
+    paths:
+      - '**.ts'
+      - '**.js'
+      - '**.tsx'
+      - '**.json'
+      - '**.yaml'
+      - '**.yml'
+      - '!.github/**'
   pull_request:
     branches: ['**']
-    paths-ignore:
-      - '**.md'
-      - '.gitignore'
-      - 'README*'
-      - 'LICENSE'
-      - '.github/**'
-      - '**.go'
-      - '**.mod'
-      - '**.sum'
+    paths:
+      - '**.ts'
+      - '**.js'
+      - '**.tsx'
+      - '**.json'
+      - '**.yaml'
+      - '**.yml'
+      - '!.github/**'
 
 jobs:
   format-and-lint:
