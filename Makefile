@@ -13,6 +13,9 @@ endif
 	go tool ent new $(name)
 
 generate:
+	go generate ./ent/...
+
+generate-clean:
 	rm -rf ent/generated && go generate ./ent/...
 
 build:
