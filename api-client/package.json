@@ -1,0 +1,26 @@
+{
+  "name": "api-client",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.ts",
+  "scripts": {
+    "check": "tsc",
+    "build": "kubb generate && node scripts/build.js && tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@kubb/plugin-axios": "^5.0.0",
+    "@kubb/plugin-react-query": "^5.0.0",
+    "@kubb/plugin-ts": "^5.0.0",
+    "@kubb/plugin-zod": "^5.0.0",
+    "kubb": "^5.0.0"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "catalog:",
+    "axios": "catalog:",
+    "zod": "catalog:"
+  }
+}

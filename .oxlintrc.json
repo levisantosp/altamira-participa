@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "ignorePatterns": ["ui/**"],
+  "ignorePatterns": ["ui/**", "api-client/**"],
   "plugins": ["typescript", "unicorn", "oxc", "nextjs", "react"],
   "categories": {
     "correctness": "error",
