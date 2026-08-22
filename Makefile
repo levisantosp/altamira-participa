@@ -20,3 +20,6 @@ generate-clean:
 
 build:
 	rm -rf bin && go build -o bin/api
+
+start:
+	bin/api
