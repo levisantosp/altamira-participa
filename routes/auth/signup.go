@@ -114,8 +114,6 @@ func SignUpWithEmail(
 	}
 
 	return &SignInOutput{
-		Status:    http.StatusFound,
-		Location:  utils.Env.WebURL,
 		SetCookie: []http.Cookie{sessionCookie},
 	}, nil
 }
