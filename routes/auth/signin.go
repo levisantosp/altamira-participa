@@ -18,20 +18,18 @@ import (
 	"github.com/levisantosp/altamira-participa/utils"
 )
 
-type SignInWithEmailInput struct {
-	Body struct {
-		Email    string `json:"email" format:"email" required:"true"`
-		Password string `json:"password" minLength:"8" maxLength:"72" required:"true"`
-	}
-}
-
 type SignInOutput struct {
 	SetCookie []http.Cookie `header:"Set-Cookie"`
 }
 
 func SignInWithEmail(
 	ctx context.Context,
-	input *SignInWithEmailInput,
+	input *struct {
+		Body struct {
+			Email    string `json:"email" format:"email" required:"true"`
+			Password string `json:"password" minLength:"8" maxLength:"72" required:"true"`
+		}
+	},
 ) (*SignInOutput, error) {
 	account, err := db.Client.Account.Query().
 		Where(account.HasUserWith(user.EmailEQ(input.Body.Email))).

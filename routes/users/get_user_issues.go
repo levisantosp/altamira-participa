@@ -12,13 +12,6 @@ import (
 	"github.com/levisantosp/altamira-participa/utils"
 )
 
-type GetUserIssuesInput struct {
-	ID     int64  `path:"id"`
-	Status string `          query:"status" enum:"open,closed,in_review"`
-	Limit  int    `          query:"limit"                               minimum:"1" maximum:"100" default:"10"`
-	Page   int    `          query:"page"                                minimum:"1"               default:"1"`
-}
-
 type Issue struct {
 	ID          int64        `json:"id"`
 	Title       string       `json:"title"`
@@ -36,7 +29,12 @@ type GetUserIssuesOutput struct {
 
 func GetUserIssues(
 	ctx context.Context,
-	input *GetUserIssuesInput,
+	input *struct {
+		ID     int64  `path:"id"`
+		Status string `          query:"status" enum:"open,closed,in_review"`
+		Limit  int    `          query:"limit"                               minimum:"1" maximum:"100" default:"10"`
+		Page   int    `          query:"page"                                minimum:"1"               default:"1"`
+	},
 ) (*GetUserIssuesOutput, error) {
 	query := db.Client.Issue.Query().
 		Where(issue.HasUserWith(user.IDEQ(input.ID))).

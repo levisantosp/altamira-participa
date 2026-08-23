@@ -17,18 +17,16 @@ import (
 	"github.com/levisantosp/altamira-participa/utils"
 )
 
-type SignUpWithEmailInput struct {
-	Body struct {
-		Email       string `json:"email" format:"email" required:"true"`
-		Password    string `json:"password" minLength:"8" maxLength:"72" required:"true"`
-		DisplayName string `json:"displayName" minLength:"1" maxLength:"100" required:"true"`
-		Username    string `json:"username" minLength:"3" maxLength:"32" pattern:"^[a-zA-Z0-9_]+$" required:"true"`
-	}
-}
-
 func SignUpWithEmail(
 	ctx context.Context,
-	input *SignUpWithEmailInput,
+	input *struct {
+		Body struct {
+			Email       string `json:"email" format:"email" required:"true"`
+			Password    string `json:"password" minLength:"8" maxLength:"72" required:"true"`
+			DisplayName string `json:"displayName" minLength:"1" maxLength:"100" required:"true"`
+			Username    string `json:"username" minLength:"3" maxLength:"32" pattern:"^[a-zA-Z0-9_]+$" required:"true"`
+		}
+	},
 ) (*SignInOutput, error) {
 	hash, err := utils.GeneratePasswordHash(input.Body.Password)
 	if err != nil {
