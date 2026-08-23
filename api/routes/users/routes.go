@@ -9,5 +9,5 @@ func Routes(api huma.API) {
 	group := huma.NewGroup(api, "/users")
 	group.UseMiddleware(plugins.Auth(api, false))
 
-	huma.Get(group, "/{id}/issues", GetIssues)
+	huma.Get(group, "/{userId}/issues", GetIssues)
 }

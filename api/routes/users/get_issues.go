@@ -30,14 +30,14 @@ type GetUserIssuesOutput struct {
 func GetIssues(
 	ctx context.Context,
 	input *struct {
-		ID     int64  `path:"id"`
+		UserID int64  `path:"userId"`
 		Status string `          query:"status" enum:"open,closed,in_review"`
 		Limit  int    `          query:"limit"                               minimum:"1" maximum:"100" default:"10"`
 		Page   int    `          query:"page"                                minimum:"1"               default:"1"`
 	},
 ) (*GetUserIssuesOutput, error) {
 	query := db.Client.Issue.Query().
-		Where(issue.HasUserWith(user.IDEQ(input.ID))).
+		Where(issue.HasUserWith(user.IDEQ(input.UserID))).
 		Order(issue.ByCreatedAt(sql.OrderDesc())).
 		Offset((input.Page - 1) * input.Limit).
 		Limit(input.Limit + 1)
