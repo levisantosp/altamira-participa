@@ -3,6 +3,7 @@ package schema
 import (
 	"context"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
@@ -24,6 +25,8 @@ func (User) Fields() []ent.Field {
 		field.String("display_name"),
 		field.Bool("is_admin").Default(false),
 		field.String("email").Unique(),
+		field.Time("created_at").Default(time.Now).Immutable(),
+		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
 

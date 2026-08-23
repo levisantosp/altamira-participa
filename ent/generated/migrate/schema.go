@@ -13,6 +13,8 @@ var (
 		{Name: "id", Type: field.TypeInt64, Increment: true},
 		{Name: "provider", Type: field.TypeEnum, Enums: []string{"google", "email"}},
 		{Name: "password", Type: field.TypeString, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "user_accounts", Type: field.TypeInt64},
 	}
 	// AccountsTable holds the schema information for the "accounts" table.
@@ -23,7 +25,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "accounts_users_accounts",
-				Columns:    []*schema.Column{AccountsColumns[3]},
+				Columns:    []*schema.Column{AccountsColumns[5]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -36,6 +38,8 @@ var (
 		{Name: "display_name", Type: field.TypeString},
 		{Name: "is_admin", Type: field.TypeBool, Default: false},
 		{Name: "email", Type: field.TypeString, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
