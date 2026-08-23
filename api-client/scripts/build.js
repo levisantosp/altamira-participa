@@ -2,8 +2,13 @@ import { readdirSync, writeFileSync } from 'node:fs'
 
 let content = `import { client } from './gen/.kubb/client'
 
-client.interceptors.request.use((req) => {
+client.interceptors.request.use(async (req) => {
   req.withCredentials = true
+
+  if (process.env.NEXT_PUBLIC_ENABLE_API_DELAY) {
+    await new Promise((r) => setTimeout(r, Math.round(Math.random() * 4000)))
+  }
+
   return req
 })
 
