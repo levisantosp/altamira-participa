@@ -23,6 +23,12 @@
       "rules": {
         "nextjs/no-img-element": "off"
       }
+    },
+    {
+      "files": ["./admin/**", "./web/**"],
+      "rules": {
+        "typescript/no-redundant-type-constituents": "off"
+      }
     }
   ]
 }
