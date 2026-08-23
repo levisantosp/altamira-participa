@@ -1,4 +1,12 @@
-import { postAuthSignInEmail, postAuthSignUpEmail } from 'api-client'
+import { queryOptions, useQuery } from '@tanstack/react-query'
+import {
+  getAuthMeQueryOptions,
+  postAuthSignInEmail,
+  postAuthSignUpEmail
+} from 'api-client'
+import { queryClient } from './query-client'
+
+const query = queryOptions(getAuthMeQueryOptions())
 
 export const auth = {
   signIn: {
@@ -20,5 +28,14 @@ export const auth = {
     }) {
       await postAuthSignUpEmail({ body })
     }
+  },
+  async fetchSession() {
+    return await queryClient.fetchQuery(query).catch(() => null)
+  },
+  useSession() {
+    return useQuery({
+      ...query,
+      staleTime: 5 * 60_000
+    })
   }
 } as const
