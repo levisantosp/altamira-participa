@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -32,14 +31,16 @@ func SignUpWithEmail(
 ) (*SignInOutput, error) {
 	hash, err := utils.GeneratePasswordHash(input.Body.Password)
 	if err != nil {
-		log.Println(err)
-		return nil, huma.Error500InternalServerError("Internal Server Error")
+		return nil, utils.LogErr(
+			huma.Error500InternalServerError("Internal Server Error"),
+		)
 	}
 
 	tx, err := db.Client.Tx(ctx)
 	if err != nil {
-		log.Println(err)
-		return nil, huma.Error500InternalServerError("Internal Server Error")
+		return nil, utils.LogErr(
+			huma.Error500InternalServerError("Internal Server Error"),
+		)
 	}
 
 	defer tx.Rollback()
@@ -56,8 +57,9 @@ func SignUpWithEmail(
 			)
 		}
 
-		log.Println(err)
-		return nil, huma.Error500InternalServerError("Internal Server Error")
+		return nil, utils.LogErr(
+			huma.Error500InternalServerError("Internal Server Error"),
+		)
 	}
 
 	_, err = tx.Account.Create().
@@ -66,20 +68,23 @@ func SignUpWithEmail(
 		SetUser(user).
 		Save(ctx)
 	if err != nil {
-		log.Println(err)
-		return nil, huma.Error500InternalServerError("Internal Server Error")
+		return nil, utils.LogErr(
+			huma.Error500InternalServerError("Internal Server Error"),
+		)
 	}
 
 	if err := tx.Commit(); err != nil {
-		log.Println(err)
-		return nil, huma.Error500InternalServerError("Internal Server Error")
+		return nil, utils.LogErr(
+			huma.Error500InternalServerError("Internal Server Error"),
+		)
 	}
 
 	sessionHash := make([]byte, 32)
 	_, err = rand.Read(sessionHash)
 	if err != nil {
-		log.Println(err)
-		return nil, huma.Error500InternalServerError("Internal Server Error")
+		return nil, utils.LogErr(
+			huma.Error500InternalServerError("Internal Server Error"),
+		)
 	}
 
 	sessionId := hex.EncodeToString(sessionHash)
@@ -92,15 +97,17 @@ func SignUpWithEmail(
 		IsAdmin:     user.IsAdmin,
 	})
 	if err != nil {
-		log.Println(err)
-		return nil, huma.Error500InternalServerError("Internal Server Error")
+		return nil, utils.LogErr(
+			huma.Error500InternalServerError("Internal Server Error"),
+		)
 	}
 
 	ttl := 7 * 24 * time.Hour
 	err = redis.Client.Set(ctx, "session:"+sessionId, session, ttl).Err()
 	if err != nil {
-		log.Println(err)
-		return nil, huma.Error500InternalServerError("Internal Server Error")
+		return nil, utils.LogErr(
+			huma.Error500InternalServerError("Internal Server Error"),
+		)
 	}
 
 	sessionCookie := http.Cookie{

@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -61,8 +60,9 @@ func SignInWithEmail(
 	sessionHash := make([]byte, 32)
 	_, err = rand.Read(sessionHash)
 	if err != nil {
-		log.Println(err)
-		return nil, huma.Error500InternalServerError("Internal Server Error")
+		return nil, utils.LogErr(
+			huma.Error500InternalServerError("Internal Server Error"),
+		)
 	}
 
 	sessionId := hex.EncodeToString(sessionHash)
@@ -75,15 +75,17 @@ func SignInWithEmail(
 		IsAdmin:     account.Edges.User.IsAdmin,
 	})
 	if err != nil {
-		log.Println(err)
-		return nil, huma.Error500InternalServerError("Internal Server Error")
+		return nil, utils.LogErr(
+			huma.Error500InternalServerError("Internal Server Error"),
+		)
 	}
 
 	ttl := 7 * 24 * time.Hour
 	err = redis.Client.Set(ctx, "session:"+sessionId, session, ttl).Err()
 	if err != nil {
-		log.Println(err)
-		return nil, huma.Error500InternalServerError("Internal Server Error")
+		return nil, utils.LogErr(
+			huma.Error500InternalServerError("Internal Server Error"),
+		)
 	}
 
 	sessionCookie := http.Cookie{
