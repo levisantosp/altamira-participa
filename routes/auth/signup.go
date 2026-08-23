@@ -12,6 +12,7 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/levisantosp/altamira-participa/db"
 	"github.com/levisantosp/altamira-participa/ent/generated"
+	"github.com/levisantosp/altamira-participa/plugins"
 	"github.com/levisantosp/altamira-participa/redis"
 	"github.com/levisantosp/altamira-participa/utils"
 )
@@ -89,7 +90,7 @@ func SignUpWithEmail(
 
 	sessionId := hex.EncodeToString(sessionHash)
 
-	session, err := json.Marshal(Session{
+	session, err := json.Marshal(plugins.Session{
 		ID:          sessionId,
 		UserId:      strconv.FormatInt(user.ID, 10),
 		Username:    user.Username,

@@ -13,6 +13,7 @@ import (
 	"github.com/levisantosp/altamira-participa/db"
 	"github.com/levisantosp/altamira-participa/ent/generated/account"
 	"github.com/levisantosp/altamira-participa/ent/generated/user"
+	"github.com/levisantosp/altamira-participa/plugins"
 	"github.com/levisantosp/altamira-participa/redis"
 	"github.com/levisantosp/altamira-participa/utils"
 )
@@ -22,14 +23,6 @@ type SignInWithEmailInput struct {
 		Email    string `json:"email" format:"email" required:"true"`
 		Password string `json:"password" minLength:"8" maxLength:"72" required:"true"`
 	}
-}
-
-type Session struct {
-	ID          string `json:"id"`
-	UserId      string `json:"userId"`
-	Username    string `json:"username"`
-	DisplayName string `json:"displayName"`
-	IsAdmin     bool   `json:"isAdmin"`
 }
 
 type SignInOutput struct {
@@ -67,7 +60,7 @@ func SignInWithEmail(
 
 	sessionId := hex.EncodeToString(sessionHash)
 
-	session, err := json.Marshal(Session{
+	session, err := json.Marshal(plugins.Session{
 		ID:          sessionId,
 		UserId:      strconv.FormatInt(account.Edges.User.ID, 10),
 		Username:    account.Edges.User.Username,
