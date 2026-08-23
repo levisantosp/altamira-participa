@@ -23,3 +23,6 @@ build:
 
 start:
 	bin/api
+
+push:
+	go run cmd/push/main.go
