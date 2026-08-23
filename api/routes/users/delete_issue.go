@@ -38,11 +38,15 @@ func DeleteIssue(
 		Where(issue.IDEQ(input.IssueID)).
 		Exec(ctx)
 	if err != nil {
-		return nil, utils.LogErr(huma.Error500InternalServerError("Internal Server Error"))
+		return nil, utils.LogErr(
+			huma.Error500InternalServerError("Internal Server Error"),
+		)
 	}
 
 	if count == 0 {
-		return nil, utils.LogErr(huma.Error404NotFound("Demanda não encontrada"))
+		return nil, utils.LogErr(
+			huma.Error404NotFound("Demanda não encontrada"),
+		)
 	}
 
 	res := DeleteIssueOutput{}
