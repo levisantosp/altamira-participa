@@ -30,7 +30,7 @@ services:
 
     command: >
       postgres
-      -p 5433
+      -p 5434
       -c shared_buffers=1536MB
       -c work_mem=4MB
       -c effective_cache_size=5GB
