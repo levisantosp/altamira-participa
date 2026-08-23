@@ -24,11 +24,7 @@ func DeleteIssue(
 		IssueID int64 `path:"issueId"`
 	},
 ) (*DeleteIssueOutput, error) {
-	userCtx, ok := plugins.GetUserFromContext(ctx)
-	if !ok {
-		return nil, utils.LogErr(huma.Error401Unauthorized("Unauthorized"))
-	}
-
+	userCtx := plugins.MustGetUserFromContext(ctx)
 	if userCtx.ID != input.UserID {
 		return nil, utils.LogErr(huma.Error403Forbidden("Forbidden"))
 	}

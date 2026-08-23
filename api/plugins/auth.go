@@ -105,12 +105,10 @@ func Auth(
 	}
 }
 
-func GetUserFromContext(ctx context.Context) (*generated.User, bool) {
-	user, ok := ctx.Value(userCtxKey).(*generated.User)
-	return user, ok
+func MustGetUserFromContext(ctx context.Context) *generated.User {
+	return ctx.Value(userCtxKey).(*generated.User)
 }
 
-func GetSessionFromContext(ctx context.Context) (Session, bool) {
-	session, ok := ctx.Value(sessionCtxKey).(Session)
-	return session, ok
+func MustGetSessionFromContext(ctx context.Context) Session {
+	return ctx.Value(sessionCtxKey).(Session)
 }
