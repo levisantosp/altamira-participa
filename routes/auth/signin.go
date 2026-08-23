@@ -34,7 +34,7 @@ type Session struct {
 }
 
 type SignInOutput struct {
-	SetCookie []http.Cookie `         header:"Set-Cookie"`
+	SetCookie []http.Cookie `header:"Set-Cookie"`
 }
 
 func SignInWithEmail(
