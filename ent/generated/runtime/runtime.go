@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/levisantosp/altamira-participa/ent/generated/account"
+	"github.com/levisantosp/altamira-participa/ent/generated/issue"
 	"github.com/levisantosp/altamira-participa/ent/generated/user"
 	"github.com/levisantosp/altamira-participa/ent/schema"
 )
@@ -26,6 +27,26 @@ func init() {
 	account.DefaultUpdatedAt = accountDescUpdatedAt.Default.(func() time.Time)
 	// account.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	account.UpdateDefaultUpdatedAt = accountDescUpdatedAt.UpdateDefault.(func() time.Time)
+	issueFields := schema.Issue{}.Fields()
+	_ = issueFields
+	// issueDescTitle is the schema descriptor for title field.
+	issueDescTitle := issueFields[1].Descriptor()
+	// issue.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	issue.TitleValidator = issueDescTitle.Validators[0].(func(string) error)
+	// issueDescDescription is the schema descriptor for description field.
+	issueDescDescription := issueFields[2].Descriptor()
+	// issue.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	issue.DescriptionValidator = issueDescDescription.Validators[0].(func(string) error)
+	// issueDescCreatedAt is the schema descriptor for created_at field.
+	issueDescCreatedAt := issueFields[4].Descriptor()
+	// issue.DefaultCreatedAt holds the default value on creation for the created_at field.
+	issue.DefaultCreatedAt = issueDescCreatedAt.Default.(func() time.Time)
+	// issueDescUpdatedAt is the schema descriptor for updated_at field.
+	issueDescUpdatedAt := issueFields[5].Descriptor()
+	// issue.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	issue.DefaultUpdatedAt = issueDescUpdatedAt.Default.(func() time.Time)
+	// issue.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	issue.UpdateDefaultUpdatedAt = issueDescUpdatedAt.UpdateDefault.(func() time.Time)
 	userHooks := schema.User{}.Hooks()
 	user.Hooks[0] = userHooks[0]
 	userFields := schema.User{}.Fields()

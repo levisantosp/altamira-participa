@@ -31,6 +31,30 @@ var (
 			},
 		},
 	}
+	// IssuesColumns holds the columns for the "issues" table.
+	IssuesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "title", Type: field.TypeString, Size: 72},
+		{Name: "description", Type: field.TypeString, Size: 65000},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"open", "closed", "in_review"}},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "user_issues", Type: field.TypeInt64},
+	}
+	// IssuesTable holds the schema information for the "issues" table.
+	IssuesTable = &schema.Table{
+		Name:       "issues",
+		Columns:    IssuesColumns,
+		PrimaryKey: []*schema.Column{IssuesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "issues_users_issues",
+				Columns:    []*schema.Column{IssuesColumns[6]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt64, Increment: true},
@@ -50,10 +74,12 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		AccountsTable,
+		IssuesTable,
 		UsersTable,
 	}
 )
 
 func init() {
 	AccountsTable.ForeignKeys[0].RefTable = UsersTable
+	IssuesTable.ForeignKeys[0].RefTable = UsersTable
 }

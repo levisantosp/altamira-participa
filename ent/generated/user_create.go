@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/levisantosp/altamira-participa/ent/generated/account"
+	"github.com/levisantosp/altamira-participa/ent/generated/issue"
 	"github.com/levisantosp/altamira-participa/ent/generated/user"
 )
 
@@ -100,6 +101,21 @@ func (_c *UserCreate) AddAccounts(v ...*Account) *UserCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddAccountIDs(ids...)
+}
+
+// AddIssueIDs adds the "issues" edge to the Issue entity by IDs.
+func (_c *UserCreate) AddIssueIDs(ids ...int64) *UserCreate {
+	_c.mutation.AddIssueIDs(ids...)
+	return _c
+}
+
+// AddIssues adds the "issues" edges to the Issue entity.
+func (_c *UserCreate) AddIssues(v ...*Issue) *UserCreate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddIssueIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -245,6 +261,22 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.IssuesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.IssuesTable,
+			Columns: []string{user.IssuesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(issue.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {

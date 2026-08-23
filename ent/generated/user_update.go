@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/levisantosp/altamira-participa/ent/generated/account"
+	"github.com/levisantosp/altamira-participa/ent/generated/issue"
 	"github.com/levisantosp/altamira-participa/ent/generated/predicate"
 	"github.com/levisantosp/altamira-participa/ent/generated/user"
 )
@@ -106,6 +107,21 @@ func (_u *UserUpdate) AddAccounts(v ...*Account) *UserUpdate {
 	return _u.AddAccountIDs(ids...)
 }
 
+// AddIssueIDs adds the "issues" edge to the Issue entity by IDs.
+func (_u *UserUpdate) AddIssueIDs(ids ...int64) *UserUpdate {
+	_u.mutation.AddIssueIDs(ids...)
+	return _u
+}
+
+// AddIssues adds the "issues" edges to the Issue entity.
+func (_u *UserUpdate) AddIssues(v ...*Issue) *UserUpdate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddIssueIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdate) Mutation() *UserMutation {
 	return _u.mutation
@@ -130,6 +146,27 @@ func (_u *UserUpdate) RemoveAccounts(v ...*Account) *UserUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveAccountIDs(ids...)
+}
+
+// ClearIssues clears all "issues" edges to the Issue entity.
+func (_u *UserUpdate) ClearIssues() *UserUpdate {
+	_u.mutation.ClearIssues()
+	return _u
+}
+
+// RemoveIssueIDs removes the "issues" edge to Issue entities by IDs.
+func (_u *UserUpdate) RemoveIssueIDs(ids ...int64) *UserUpdate {
+	_u.mutation.RemoveIssueIDs(ids...)
+	return _u
+}
+
+// RemoveIssues removes "issues" edges to Issue entities.
+func (_u *UserUpdate) RemoveIssues(v ...*Issue) *UserUpdate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveIssueIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -243,6 +280,51 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.IssuesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.IssuesTable,
+			Columns: []string{user.IssuesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(issue.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedIssuesIDs(); len(nodes) > 0 && !_u.mutation.IssuesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.IssuesTable,
+			Columns: []string{user.IssuesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(issue.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.IssuesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.IssuesTable,
+			Columns: []string{user.IssuesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(issue.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -340,6 +422,21 @@ func (_u *UserUpdateOne) AddAccounts(v ...*Account) *UserUpdateOne {
 	return _u.AddAccountIDs(ids...)
 }
 
+// AddIssueIDs adds the "issues" edge to the Issue entity by IDs.
+func (_u *UserUpdateOne) AddIssueIDs(ids ...int64) *UserUpdateOne {
+	_u.mutation.AddIssueIDs(ids...)
+	return _u
+}
+
+// AddIssues adds the "issues" edges to the Issue entity.
+func (_u *UserUpdateOne) AddIssues(v ...*Issue) *UserUpdateOne {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddIssueIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdateOne) Mutation() *UserMutation {
 	return _u.mutation
@@ -364,6 +461,27 @@ func (_u *UserUpdateOne) RemoveAccounts(v ...*Account) *UserUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveAccountIDs(ids...)
+}
+
+// ClearIssues clears all "issues" edges to the Issue entity.
+func (_u *UserUpdateOne) ClearIssues() *UserUpdateOne {
+	_u.mutation.ClearIssues()
+	return _u
+}
+
+// RemoveIssueIDs removes the "issues" edge to Issue entities by IDs.
+func (_u *UserUpdateOne) RemoveIssueIDs(ids ...int64) *UserUpdateOne {
+	_u.mutation.RemoveIssueIDs(ids...)
+	return _u
+}
+
+// RemoveIssues removes "issues" edges to Issue entities.
+func (_u *UserUpdateOne) RemoveIssues(v ...*Issue) *UserUpdateOne {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveIssueIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -500,6 +618,51 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.IssuesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.IssuesTable,
+			Columns: []string{user.IssuesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(issue.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedIssuesIDs(); len(nodes) > 0 && !_u.mutation.IssuesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.IssuesTable,
+			Columns: []string{user.IssuesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(issue.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.IssuesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.IssuesTable,
+			Columns: []string{user.IssuesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(issue.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {

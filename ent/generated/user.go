@@ -39,9 +39,11 @@ type User struct {
 type UserEdges struct {
 	// Accounts holds the value of the accounts edge.
 	Accounts []*Account `json:"accounts,omitempty"`
+	// Issues holds the value of the issues edge.
+	Issues []*Issue `json:"issues,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // AccountsOrErr returns the Accounts value or an error if the edge
@@ -51,6 +53,15 @@ func (e UserEdges) AccountsOrErr() ([]*Account, error) {
 		return e.Accounts, nil
 	}
 	return nil, &NotLoadedError{edge: "accounts"}
+}
+
+// IssuesOrErr returns the Issues value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) IssuesOrErr() ([]*Issue, error) {
+	if e.loadedTypes[1] {
+		return e.Issues, nil
+	}
+	return nil, &NotLoadedError{edge: "issues"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -139,6 +150,11 @@ func (_m *User) Value(name string) (ent.Value, error) {
 // QueryAccounts queries the "accounts" edge of the User entity.
 func (_m *User) QueryAccounts() *AccountQuery {
 	return NewUserClient(_m.config).QueryAccounts(_m)
+}
+
+// QueryIssues queries the "issues" edge of the User entity.
+func (_m *User) QueryIssues() *IssueQuery {
+	return NewUserClient(_m.config).QueryIssues(_m)
 }
 
 // Update returns a builder for updating this User.
