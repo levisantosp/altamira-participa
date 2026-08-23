@@ -42,7 +42,7 @@ func main() {
 
 	api := humachi.New(r, huma.DefaultConfig("api docs", "0.0.0"))
 
-	auth.AuthRoutes(api)
+	auth.Routes(api)
 
 	log.Println("HTTP server running at http://localhost:3333")
 	http.ListenAndServe(":3333", r)
