@@ -27,7 +27,7 @@ type GetUserIssuesOutput struct {
 	Body GetUserIssuesOutputBody
 }
 
-func GetUserIssues(
+func GetIssues(
 	ctx context.Context,
 	input *struct {
 		ID     int64  `path:"id"`
