@@ -11,6 +11,7 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/levisantosp/altamira-participa/db"
 	"github.com/levisantosp/altamira-participa/routes/auth"
+	"github.com/levisantosp/altamira-participa/routes/users"
 	"github.com/levisantosp/altamira-participa/utils"
 
 	_ "github.com/levisantosp/altamira-participa/ent/generated/runtime"
@@ -43,6 +44,7 @@ func main() {
 	api := humachi.New(r, huma.DefaultConfig("api docs", "0.0.0"))
 
 	auth.Routes(api)
+	users.Routes(api)
 
 	log.Println("HTTP server running at http://localhost:3333")
 	http.ListenAndServe(":3333", r)
