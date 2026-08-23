@@ -1,5 +1,5 @@
 dev:
-	go run main.go
+	go run ./api
 
 fmt:
 	find . -path './pg' -prune -o -type f -name '*.go' -exec go tool gofumpt -w {} +
@@ -13,16 +13,16 @@ endif
 	go tool ent new $(name)
 
 generate:
-	go generate ./ent/...
+	go generate ./api/ent/...
 
 generate-clean:
-	rm -rf ent/generated && go generate ./ent/...
+	rm -rf api/ent/generated && go generate ./api/ent/...
 
 build:
-	rm -rf bin && go build -o bin/api
+	rm -rf bin && go build -o bin/api ./api
 
 start:
 	bin/api
 
 push:
-	go run cmd/push/main.go
+	go run ./api/cmd/push
