@@ -11,10 +11,17 @@
     "check": "tsc"
   },
   "dependencies": {
+    "@hookform/resolvers": "catalog:",
+    "@tanstack/react-query": "catalog:",
+    "api-client": "workspace:*",
+    "axios": "catalog:",
     "next": "16.3.1",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "ui": "workspace:*"
+    "react-hook-form": "catalog:",
+    "sonner": "catalog:",
+    "ui": "workspace:*",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "catalog:",

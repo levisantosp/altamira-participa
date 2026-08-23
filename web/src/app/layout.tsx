@@ -1,14 +1,10 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono, Inter } from 'next/font/google'
+import { Geist_Mono, Inter } from 'next/font/google'
 import './globals.css'
+import { Toaster } from 'sonner'
 import { cn } from 'ui/lib/utils'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
-
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin']
-})
 
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
@@ -27,13 +23,26 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       className={cn(
         'h-full',
         'antialiased',
-        geistSans.variable,
         geistMono.variable,
         'font-sans',
         inter.variable
       )}
     >
-      <body className='min-h-full flex flex-col'>{children}</body>
+      <body className='flex flex-col justify-center items-center mt-5 mb-30 ml-30 mr-30 dark'>
+        {children}
+      </body>
+      <Toaster
+        position='top-center'
+        theme='dark'
+        style={
+          {
+            '--border-radius': '9999px',
+            '--normal-bg': 'oklch(0.21 0.006 285.885)',
+            '--normal-border': 'oklch(1 0 0 / 10%)',
+            '--normal-text': 'oklch(0.985 0 0)'
+          } as React.CSSProperties
+        }
+      />
     </html>
   )
 }
