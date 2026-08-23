@@ -30,19 +30,20 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
     >
       <body className='flex flex-col justify-center items-center mt-5 mb-30 ml-30 mr-30 dark'>
         {children}
+
+        <Toaster
+          position='top-center'
+          theme='dark'
+          style={
+            {
+              '--border-radius': '9999px',
+              '--normal-bg': 'oklch(0.21 0.006 285.885)',
+              '--normal-border': 'oklch(1 0 0 / 10%)',
+              '--normal-text': 'oklch(0.985 0 0)'
+            } as React.CSSProperties
+          }
+        />
       </body>
-      <Toaster
-        position='top-center'
-        theme='dark'
-        style={
-          {
-            '--border-radius': '9999px',
-            '--normal-bg': 'oklch(0.21 0.006 285.885)',
-            '--normal-border': 'oklch(1 0 0 / 10%)',
-            '--normal-text': 'oklch(0.985 0 0)'
-          } as React.CSSProperties
-        }
-      />
     </html>
   )
 }
