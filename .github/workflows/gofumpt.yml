@@ -7,6 +7,7 @@ on:
       - 'go.mod'
       - 'go.sum'
       - 'Makefile'
+      - 'go.work'
   pull_request:
     branches: ['**']
     paths:
@@ -14,6 +15,7 @@ on:
       - 'go.mod'
       - 'go.sum'
       - 'Makefile'
+      - 'go.work'
 
 jobs:
   fmt:
@@ -34,7 +36,7 @@ jobs:
       - name: setup go
         uses: actions/setup-go@main
         with:
-          go-version-file: go.mod
+          go-version-file: go.work
           cache: true
 
       - name: run go fmt autofix
