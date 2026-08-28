@@ -30,7 +30,7 @@ export const auth = {
     }
   },
   async fetchSession() {
-    return await queryClient.fetchQuery(query).catch(() => null)
+    return await queryClient.query(query).catch(() => null)
   },
   useSession() {
     return useQuery({
