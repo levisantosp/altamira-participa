@@ -6,7 +6,10 @@ import {
 } from 'api-client'
 import { queryClient } from './query-client'
 
-const query = queryOptions(getAuthMeQueryOptions())
+const query = queryOptions({
+  ...getAuthMeQueryOptions(),
+  staleTime: 5 * 60_000
+})
 
 export const auth = {
   signIn: {
