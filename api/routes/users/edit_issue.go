@@ -9,7 +9,7 @@ import (
 	"github.com/levisantosp/altamira-participa/api/ent/generated"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/issue"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/user"
-	"github.com/levisantosp/altamira-participa/api/plugins"
+	"github.com/levisantosp/altamira-participa/api/middlewares"
 	"github.com/levisantosp/altamira-participa/api/utils"
 )
 
@@ -22,7 +22,7 @@ func EditIssue(ctx context.Context, input *struct {
 	IssueID int64 `path:"issueId"`
 },
 ) (*EditIssueOutput, error) {
-	userCtx := plugins.MustGetUserFromContext(ctx)
+	userCtx := middlewares.MustGetUserFromContext(ctx)
 	if userCtx.ID != input.UserID {
 		return nil, utils.LogErr(huma.Error403Forbidden("Forbidden"))
 	}

@@ -6,13 +6,13 @@ import (
 	"net/http"
 
 	"github.com/danielgtaylor/huma/v2"
-	"github.com/levisantosp/altamira-participa/api/plugins"
+	"github.com/levisantosp/altamira-participa/api/middlewares"
 	"github.com/levisantosp/altamira-participa/api/redis"
 	"github.com/levisantosp/altamira-participa/api/utils"
 )
 
 type GetMeOutput struct {
-	Body plugins.Session
+	Body middlewares.Session
 }
 
 func GetMe(ctx context.Context, input *struct {
@@ -30,7 +30,7 @@ func GetMe(ctx context.Context, input *struct {
 		)
 	}
 
-	var session plugins.Session
+	var session middlewares.Session
 	if err := json.Unmarshal([]byte(raw), &session); err != nil {
 		return nil, utils.LogErr(
 			huma.Error500InternalServerError("Internal Server Error"),
