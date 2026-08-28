@@ -478,6 +478,7 @@ func (_q *UserQuery) loadAccounts(ctx context.Context, query *AccountQuery, node
 	}
 	return nil
 }
+
 func (_q *UserQuery) loadIssues(ctx context.Context, query *IssueQuery, nodes []*User, init func(*User), assign func(*User, *Issue)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int64]*User)
