@@ -2,26 +2,17 @@ package users
 
 import (
 	"context"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/levisantosp/altamira-participa/api/db"
+	"github.com/levisantosp/altamira-participa/api/dtos"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/issue"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/user"
 	"github.com/levisantosp/altamira-participa/api/utils"
 )
 
-type Issue struct {
-	ID          int64        `json:"id"`
-	Title       string       `json:"title"`
-	Description string       `json:"description"`
-	Status      issue.Status `json:"status"`
-	CreatedAt   time.Time    `json:"createdAt"`
-	UpdatedAt   time.Time    `json:"updatedAt"`
-}
-
-type GetUserIssuesOutputBody = utils.PaginatedResponse[Issue]
+type GetUserIssuesOutputBody = utils.PaginatedResponse[dtos.Issue]
 
 type GetUserIssuesOutput struct {
 	Body GetUserIssuesOutputBody
@@ -53,17 +44,10 @@ func GetIssues(
 		)
 	}
 
-	items := make([]Issue, 0, len(issues))
+	items := make([]dtos.Issue, 0, len(issues))
 
 	for _, item := range issues {
-		items = append(items, Issue{
-			ID:          item.ID,
-			Title:       item.Title,
-			Description: item.Description,
-			Status:      item.Status,
-			CreatedAt:   item.CreatedAt,
-			UpdatedAt:   item.UpdatedAt,
-		})
+		items = append(items, dtos.IssueFrom(item))
 	}
 
 	return &GetUserIssuesOutput{

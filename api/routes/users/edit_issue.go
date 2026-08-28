@@ -5,6 +5,7 @@ import (
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/levisantosp/altamira-participa/api/db"
+	"github.com/levisantosp/altamira-participa/api/dtos"
 	"github.com/levisantosp/altamira-participa/api/ent/generated"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/issue"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/user"
@@ -13,7 +14,7 @@ import (
 )
 
 type EditIssueOutput struct {
-	Body Issue
+	Body dtos.Issue
 }
 
 func EditIssue(ctx context.Context, input *struct {
@@ -42,13 +43,6 @@ func EditIssue(ctx context.Context, input *struct {
 	}
 
 	return &EditIssueOutput{
-		Body: Issue{
-			ID:          issue.ID,
-			Title:       issue.Title,
-			Description: issue.Description,
-			Status:      issue.Status,
-			CreatedAt:   issue.CreatedAt,
-			UpdatedAt:   issue.UpdatedAt,
-		},
+		Body: dtos.IssueFrom(issue),
 	}, nil
 }
