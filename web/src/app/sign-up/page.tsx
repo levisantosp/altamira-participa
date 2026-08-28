@@ -78,8 +78,8 @@ export default function SignUp() {
   }
 
   return (
-    <>
-      <Card className='w-full max-w-xl'>
+    <div className='flex min-h-[calc(100vh-8.75rem)] items-center justify-center w-full'>
+      <Card className='w-full max-w-md md:max-w-xl'>
         <CardHeader>
           <CardTitle>Crie sua conta</CardTitle>
           <CardDescription>
@@ -187,6 +187,6 @@ export default function SignUp() {
           </Button>
         </CardFooter>
       </Card>
-    </>
+    </div>
   )
 }

@@ -51,8 +51,8 @@ export default function SignIn() {
   }
 
   return (
-    <>
-      <Card className='w-full max-w-xl'>
+    <div className='flex min-h-[calc(100vh-8.75rem)] items-center justify-center w-full'>
+      <Card className='w-full max-w-md md:max-w-xl'>
         <CardHeader>
           <CardTitle>Bem vindo(a) de volta!</CardTitle>
           <CardDescription>
@@ -120,10 +120,10 @@ export default function SignIn() {
             {form.formState.isSubmitting ? <Spinner /> : <span>Entrar</span>}
           </Button>
           <Button variant='outline' className='w-full' disabled>
-            Login with Google
+            Entrar com Google
           </Button>
         </CardFooter>
       </Card>
-    </>
+    </div>
   )
 }
