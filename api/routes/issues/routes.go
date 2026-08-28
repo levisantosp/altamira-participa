@@ -10,4 +10,5 @@ func Routes(api huma.API) {
 	group.UseMiddleware(middlewares.Auth(api, false))
 
 	huma.Get(group, "", GetIssues)
+	huma.Post(group, "", CreateIssue)
 }
