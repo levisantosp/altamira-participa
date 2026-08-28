@@ -11,6 +11,7 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/levisantosp/altamira-participa/api/db"
 	"github.com/levisantosp/altamira-participa/api/routes/auth"
+	"github.com/levisantosp/altamira-participa/api/routes/issues"
 	"github.com/levisantosp/altamira-participa/api/routes/users"
 	"github.com/levisantosp/altamira-participa/api/utils"
 
@@ -23,6 +24,7 @@ func main() {
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
+	r.Use(middleware.RedirectSlashes)
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins: utils.Env.TrustedOrigins,
 		AllowedMethods: []string{
@@ -45,6 +47,7 @@ func main() {
 
 	auth.Routes(api)
 	users.Routes(api)
+	issues.Routes(api)
 
 	log.Println("HTTP server running at http://localhost:3333")
 	http.ListenAndServe(":3333", r)
