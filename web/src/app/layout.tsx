@@ -29,7 +29,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
         inter.variable
       )}
     >
-      <body className='flex flex-col justify-center items-center mt-5 mb-30 ml-30 mr-30 dark'>
+      <body className='flex flex-col justify-center items-center mt-5 mb-30 md:ml-30 md:mr-30 dark'>
         <AuthProvider>
           {children}
 
