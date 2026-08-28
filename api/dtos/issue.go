@@ -16,13 +16,13 @@ type Issue struct {
 	UpdatedAt   time.Time    `json:"updatedAt"`
 }
 
-func IssueFrom(e *generated.Issue) Issue {
+func IssueFrom(issue *generated.Issue) Issue {
 	return Issue{
-		ID:          e.ID,
-		Title:       e.Title,
-		Description: e.Description,
-		Status:      e.Status,
-		CreatedAt:   e.CreatedAt,
-		UpdatedAt:   e.UpdatedAt,
+		ID:          issue.ID,
+		Title:       issue.Title,
+		Description: issue.Description,
+		Status:      issue.Status,
+		CreatedAt:   issue.CreatedAt,
+		UpdatedAt:   issue.UpdatedAt,
 	}
 }
