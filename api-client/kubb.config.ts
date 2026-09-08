@@ -4,8 +4,10 @@ import { pluginTs } from '@kubb/plugin-ts'
 import { pluginZod } from '@kubb/plugin-zod'
 import { defineConfig } from 'kubb/config'
 
+process.loadEnvFile()
+
 export default defineConfig({
-  input: 'http://localhost:3333/openapi.json',
+  input: `${process.env.API_URL}/openapi.json`,
   output: {
     path: './src/gen',
     clean: true
