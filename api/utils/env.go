@@ -13,6 +13,7 @@ import (
 type TEnv struct {
 	DatabaseURL    string   `zog:"DATABASE_URL"`
 	RedisAddr      string   `zog:"REDIS_ADDR"`
+	RedisPassword  string   `zog:"REDIS_PASSWORD"`
 	TrustedOrigins []string `zog:"TRUSTED_ORIGINS"`
 	DashboardURL   string   `zog:"DASHBOARD_URL"`
 	WebURL         string   `zog:"WEB_URL"`
@@ -21,13 +22,12 @@ type TEnv struct {
 var Env TEnv
 
 func LoadEnv(envFile string) {
-	if err := godotenv.Overload(envFile); err != nil {
-		log.Fatal(err)
-	}
+	_ = godotenv.Overload(envFile)
 
 	schema := zog.Struct(zog.Shape{
-		"DatabaseURL": zog.String().URL().Required(),
-		"RedisAddr":   zog.String().Required(),
+		"DatabaseURL":   zog.String().URL().Required(),
+		"RedisAddr":     zog.String().Required(),
+		"RedisPassword": zog.String().Required(),
 		"TrustedOrigins": zog.Preprocess(
 			func(data any, ctx zog.Ctx) (any, error) {
 				value, ok := data.(string)
