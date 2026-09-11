@@ -23,3 +23,5 @@ catalog:
   sonner: ^2.0.8
 
 cleanupUnusedCatalogs: true
+
+catalogMode: prefer
