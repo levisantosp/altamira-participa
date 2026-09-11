@@ -1,0 +1,12 @@
+{
+  "$schema": "./node_modules/turbo/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"]
+    },
+    "check": {
+      "dependsOn": ["^check"]
+    }
+  }
+}
