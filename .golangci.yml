@@ -1,0 +1,8 @@
+version: '2'
+
+linters:
+  settings:
+    errcheck:
+      exclude-functions:
+        - github.com/danielgtaylor/huma/v2.WriteErr
+        - github.com/levisantosp/altamira-participa/api/utils.LogErr
