@@ -9,6 +9,9 @@ fmt:
 lint:
 	cd api && golangci-lint $(filter-out $@,$(MAKECMDGOALS))
 
+lintf:
+	cd api && golangci-lint run --fix
+
 create-schema:
 ifndef name
 	$(error name is required. Usage: make create-schema name=SchemaName)

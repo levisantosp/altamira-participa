@@ -1,4 +1,4 @@
-name: go fmt check
+name: go format and lint
 on:
   push:
     branches: ['**']
@@ -18,12 +18,13 @@ on:
       - 'go.work'
 
 jobs:
-  fmt:
+  format-and-lint:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
 
     permissions:
       contents: write
+      pull-requests: read
 
     steps:
       - name: checkout code
@@ -39,16 +40,25 @@ jobs:
           go-version-file: go.work
           cache: true
 
-      - name: run go fmt autofix
+      - name: setup golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.13
+          working-directory: api
+          install-only: true
+
+      - name: run go fmt and golangci-lint autofix
         if: github.event_name == 'push'
-        run: make fmt
+        run: |
+          make fmt
+          make lintf
 
       - name: commit changes
         if: github.event_name == 'push'
         uses: stefanzweifel/git-auto-commit-action@master
         with:
           commit_message: |
-            style: run go fmt autofix
+            style: run go fmt e golangci-lint autofix
 
             Co-authored-by: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
           commit_user_name: github-actions[bot]
@@ -60,3 +70,10 @@ jobs:
         run: |
           make fmt
           git diff --exit-code --stat
+
+      - name: golangci-lint
+        if: github.event_name == 'pull_request'
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.13
+          working-directory: api
