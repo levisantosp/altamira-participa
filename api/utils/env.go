@@ -20,8 +20,10 @@ type TEnv struct {
 
 var Env TEnv
 
-func LoadEnv() {
-	godotenv.Load()
+func LoadEnv(envFile string) {
+	if err := godotenv.Overload(envFile); err != nil {
+		log.Fatal(err)
+	}
 
 	schema := zog.Struct(zog.Shape{
 		"DatabaseURL": zog.String().URL().Required(),

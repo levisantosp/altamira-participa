@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	utils.LoadEnv()
+	utils.LoadEnv(".env")
 	db.Connect()
 
 	err := db.Client.Schema.Create(context.Background())
