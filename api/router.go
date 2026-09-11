@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -9,19 +8,13 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
-	"github.com/levisantosp/altamira-participa/api/db"
 	"github.com/levisantosp/altamira-participa/api/routes/auth"
 	"github.com/levisantosp/altamira-participa/api/routes/issues"
 	"github.com/levisantosp/altamira-participa/api/routes/users"
 	"github.com/levisantosp/altamira-participa/api/utils"
-
-	_ "github.com/levisantosp/altamira-participa/api/ent/generated/runtime"
 )
 
-func main() {
-	utils.LoadEnv(".env")
-	db.Connect()
-
+func CreateRouter() *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.RedirectSlashes)
@@ -49,8 +42,5 @@ func main() {
 	users.Routes(api)
 	issues.Routes(api)
 
-	log.Println("HTTP server running at http://localhost:3333")
-	if err := http.ListenAndServe(":3333", r); err != nil {
-		log.Fatal(err)
-	}
+	return r
 }

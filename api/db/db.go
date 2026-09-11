@@ -14,7 +14,7 @@ import (
 
 var Client *generated.Client
 
-func Connect() {
+func Connect() *sql.DB {
 	db, err := sql.Open("pgx", utils.Env.DatabaseURL)
 	if err != nil {
 		log.Fatal(err)
@@ -27,4 +27,6 @@ func Connect() {
 	Client = generated.NewClient(
 		generated.Driver(entsql.OpenDB(dialect.Postgres, db)),
 	)
+
+	return db
 }
