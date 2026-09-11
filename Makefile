@@ -29,3 +29,6 @@ start:
 
 push:
 	go run ./api/cmd/push
+
+test:
+	go test ./api/routes/...
