@@ -20,6 +20,10 @@ type EditIssueOutput struct {
 func EditIssue(ctx context.Context, input *struct {
 	UserID  int64 `path:"userId"`
 	IssueID int64 `path:"issueId"`
+	Body    struct {
+		Title       string `json:"title" maxLength:"72" minLength:"3" required:"true"`
+		Description string `json:"description" maxLength:"65000" minLength:"10" required:"true"`
+	}
 },
 ) (*EditIssueOutput, error) {
 	userCtx := middlewares.MustGetUserFromContext(ctx)
@@ -28,7 +32,9 @@ func EditIssue(ctx context.Context, input *struct {
 	}
 
 	issue, err := db.Client.Issue.UpdateOneID(input.IssueID).
-		Where(issue.HasUserWith(user.IDEQ(input.UserID))).
+		Where(issue.HasUserWith(user.IDEQ(userCtx.ID))).
+		SetTitle(input.Body.Title).
+		SetDescription(input.Body.Description).
 		Save(ctx)
 	if err != nil {
 		if generated.IsNotFound(err) {
