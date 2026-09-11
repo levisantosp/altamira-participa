@@ -85,6 +85,9 @@ var (
 // Status defines the type for the "status" enum field.
 type Status string
 
+// StatusOpen is the default value of the Status enum.
+const DefaultStatus = StatusOpen
+
 // Status values.
 const (
 	StatusOpen     Status = "open"

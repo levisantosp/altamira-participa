@@ -39,6 +39,14 @@ func (_c *IssueCreate) SetStatus(v issue.Status) *IssueCreate {
 	return _c
 }
 
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_c *IssueCreate) SetNillableStatus(v *issue.Status) *IssueCreate {
+	if v != nil {
+		_c.SetStatus(*v)
+	}
+	return _c
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (_c *IssueCreate) SetCreatedAt(v time.Time) *IssueCreate {
 	_c.mutation.SetCreatedAt(v)
@@ -119,6 +127,10 @@ func (_c *IssueCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *IssueCreate) defaults() {
+	if _, ok := _c.mutation.Status(); !ok {
+		v := issue.DefaultStatus
+		_c.mutation.SetStatus(v)
+	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := issue.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)

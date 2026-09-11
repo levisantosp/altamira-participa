@@ -36,7 +36,7 @@ var (
 		{Name: "id", Type: field.TypeInt64, Increment: true},
 		{Name: "title", Type: field.TypeString, Size: 72},
 		{Name: "description", Type: field.TypeString, Size: 65000},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"open", "closed", "in_review"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"open", "closed", "in_review"}, Default: "open"},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "user_issues", Type: field.TypeInt64},

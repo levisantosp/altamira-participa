@@ -20,7 +20,9 @@ func (Issue) Fields() []ent.Field {
 		field.Int64("id"),
 		field.String("title").MaxLen(72),
 		field.String("description").MaxLen(65_000),
-		field.Enum("status").Values("open", "closed", "in_review"),
+		field.Enum("status").
+			Values("open", "closed", "in_review").
+			Default("open"),
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
