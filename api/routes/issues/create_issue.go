@@ -18,8 +18,8 @@ func CreateIssue(
 	ctx context.Context,
 	input *struct {
 		Body struct {
-			Title       string       `json:"title" maxLength:"72" minLength:"3" required:"true"`
-			Description string       `json:"description" maxLength:"65000" minLength:"10" required:"true"`
+			Title       string `json:"title" maxLength:"72" minLength:"3" required:"true"`
+			Description string `json:"description" maxLength:"65000" minLength:"10" required:"true"`
 		}
 	},
 ) (*CreateIssueOutput, error) {
