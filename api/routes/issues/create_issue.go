@@ -21,7 +21,7 @@ func CreateIssue(
 		Body struct {
 			Title       string       `json:"title" maxLength:"72" minLength:"3" required:"true"`
 			Description string       `json:"description" maxLength:"65000" minLength:"10" required:"true"`
-			Status      issue.Status `json:"status" enum:"open,closed,in_review" default:"open"`
+			Status      issue.Status `json:"status,omitempty" enum:"open,closed,in_review" default:"open"`
 		}
 	},
 ) (*CreateIssueOutput, error) {
