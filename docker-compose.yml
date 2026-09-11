@@ -71,5 +71,19 @@ services:
     ports:
       - '3335:3333'
 
+  web:
+    depends_on:
+      api:
+        condition: service_started
+    build:
+      context: .
+      dockerfile: ./web/Dockerfile
+    container_name: web-altamira-participa
+    restart: unless-stopped
+    env_file:
+      - ./web/.env
+    ports:
+      - '5174:5174'
+
 volumes:
   redis_data:

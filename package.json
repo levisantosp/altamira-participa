@@ -8,7 +8,8 @@
     "lint": "oxlint",
     "build": "turbo run build",
     "check": "turbo run check",
-    "build:web": "turbo run build -F web"
+    "build:web": "turbo run build -F web",
+    "start:web": "turbo run start -F web"
   },
   "devDependencies": {
     "@types/node": "^26.5.1",
@@ -22,7 +23,7 @@
     "packageManager": {
       "name": "pnpm",
       "version": "12.3.4",
-      "onFail": "error"
+      "onFail": "download"
     },
     "runtime": {
       "name": "node",
