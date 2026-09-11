@@ -42,7 +42,9 @@ func SignUpWithEmail(
 		)
 	}
 
-	defer tx.Rollback()
+	defer func() {
+		_ = tx.Rollback()
+	}()
 
 	user, err := tx.User.Create().
 		SetEmail(input.Body.Email).
