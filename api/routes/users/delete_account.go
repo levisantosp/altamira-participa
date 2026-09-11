@@ -22,6 +22,7 @@ func DeleteAccount(
 	if err := db.Client.User.DeleteOneID(user.ID).Exec(ctx); err != nil {
 		return nil, utils.LogErr(
 			huma.Error500InternalServerError("Internal Server Error"),
+			err,
 		)
 	}
 
@@ -29,6 +30,7 @@ func DeleteAccount(
 		Err(); err != nil {
 		return nil, utils.LogErr(
 			huma.Error500InternalServerError("Internal Server Error"),
+			err,
 		)
 	}
 

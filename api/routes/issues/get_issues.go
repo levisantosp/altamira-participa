@@ -32,6 +32,7 @@ func GetIssues(
 	if err != nil {
 		return nil, utils.LogErr(
 			huma.Error500InternalServerError("Internal Server Error"),
+			err,
 		)
 	}
 

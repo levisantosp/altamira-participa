@@ -26,7 +26,7 @@ func DeleteIssue(
 ) (*DeleteIssueOutput, error) {
 	userCtx := middlewares.MustGetUserFromContext(ctx)
 	if userCtx.ID != input.UserID {
-		return nil, utils.LogErr(huma.Error403Forbidden("Forbidden"))
+		return nil, huma.Error403Forbidden("Forbidden")
 	}
 
 	count, err := db.Client.Issue.Delete().
@@ -36,13 +36,12 @@ func DeleteIssue(
 	if err != nil {
 		return nil, utils.LogErr(
 			huma.Error500InternalServerError("Internal Server Error"),
+			err,
 		)
 	}
 
 	if count == 0 {
-		return nil, utils.LogErr(
-			huma.Error404NotFound("Demanda não encontrada"),
-		)
+		return nil, huma.Error404NotFound("Demanda não encontrada")
 	}
 
 	res := DeleteIssueOutput{}

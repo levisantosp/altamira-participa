@@ -28,7 +28,7 @@ func EditIssue(ctx context.Context, input *struct {
 ) (*EditIssueOutput, error) {
 	userCtx := middlewares.MustGetUserFromContext(ctx)
 	if userCtx.ID != input.UserID {
-		return nil, utils.LogErr(huma.Error403Forbidden("Forbidden"))
+		return nil, huma.Error403Forbidden("Forbidden")
 	}
 
 	issue, err := db.Client.Issue.UpdateOneID(input.IssueID).
@@ -40,11 +40,13 @@ func EditIssue(ctx context.Context, input *struct {
 		if generated.IsNotFound(err) {
 			return nil, utils.LogErr(
 				huma.Error404NotFound("Demanda não encontrada"),
+				err,
 			)
 		}
 
 		return nil, utils.LogErr(
 			huma.Error500InternalServerError("Internal Server Error"),
+			err,
 		)
 	}
 

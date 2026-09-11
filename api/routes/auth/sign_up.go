@@ -32,6 +32,7 @@ func SignUpWithEmail(
 	if err != nil {
 		return nil, utils.LogErr(
 			huma.Error500InternalServerError("Internal Server Error"),
+			err,
 		)
 	}
 
@@ -39,6 +40,7 @@ func SignUpWithEmail(
 	if err != nil {
 		return nil, utils.LogErr(
 			huma.Error500InternalServerError("Internal Server Error"),
+			err,
 		)
 	}
 
@@ -60,6 +62,7 @@ func SignUpWithEmail(
 
 		return nil, utils.LogErr(
 			huma.Error500InternalServerError("Internal Server Error"),
+			err,
 		)
 	}
 
@@ -71,12 +74,14 @@ func SignUpWithEmail(
 	if err != nil {
 		return nil, utils.LogErr(
 			huma.Error500InternalServerError("Internal Server Error"),
+			err,
 		)
 	}
 
 	if err := tx.Commit(); err != nil {
 		return nil, utils.LogErr(
 			huma.Error500InternalServerError("Internal Server Error"),
+			err,
 		)
 	}
 
@@ -85,6 +90,7 @@ func SignUpWithEmail(
 	if err != nil {
 		return nil, utils.LogErr(
 			huma.Error500InternalServerError("Internal Server Error"),
+			err,
 		)
 	}
 
@@ -100,6 +106,7 @@ func SignUpWithEmail(
 	if err != nil {
 		return nil, utils.LogErr(
 			huma.Error500InternalServerError("Internal Server Error"),
+			err,
 		)
 	}
 
@@ -108,6 +115,7 @@ func SignUpWithEmail(
 	if err != nil {
 		return nil, utils.LogErr(
 			huma.Error500InternalServerError("Internal Server Error"),
+			err,
 		)
 	}
 

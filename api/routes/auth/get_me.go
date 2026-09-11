@@ -25,8 +25,12 @@ func GetMe(ctx context.Context, input *struct {
 
 	raw, err := redis.Client.Get(ctx, "session:"+input.Session.Value).Result()
 	if err != nil {
+		if err == redis.Nil {
+			return nil, huma.Error404NotFound("Not Found")
+		}
 		return nil, utils.LogErr(
 			huma.Error500InternalServerError("Internal Server Error"),
+			err,
 		)
 	}
 
@@ -34,6 +38,7 @@ func GetMe(ctx context.Context, input *struct {
 	if err := json.Unmarshal([]byte(raw), &session); err != nil {
 		return nil, utils.LogErr(
 			huma.Error500InternalServerError("Internal Server Error"),
+			err,
 		)
 	}
 

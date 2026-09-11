@@ -17,6 +17,7 @@ func SignOut(ctx context.Context, input *struct{}) (*SignInOutput, error) {
 		Err(); err != nil {
 		return nil, utils.LogErr(
 			huma.Error500InternalServerError("Internal Server Error"),
+			err,
 		)
 	}
 

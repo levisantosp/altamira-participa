@@ -42,13 +42,29 @@ func Auth(
 		raw, err := redis.Client.Get(ctx.Context(), "session:"+cookie.Value).
 			Result()
 		if err != nil {
-			huma.WriteErr(api, ctx, http.StatusUnauthorized, "Unauthorized")
+			if err == redis.Nil {
+				huma.WriteErr(api, ctx, http.StatusUnauthorized, "Unauthorized")
+				return
+			}
+			utils.LogErr(
+				huma.Error500InternalServerError("Internal Server Error"),
+				err,
+			)
+			huma.WriteErr(
+				api,
+				ctx,
+				http.StatusInternalServerError,
+				"Internal Server Error",
+			)
 			return
 		}
 
 		var session Session
 		if err := json.Unmarshal([]byte(raw), &session); err != nil {
-			utils.LogErr(err)
+			utils.LogErr(
+				huma.Error500InternalServerError("Internal Server Error"),
+				err,
+			)
 			huma.WriteErr(
 				api,
 				ctx,
@@ -60,7 +76,10 @@ func Auth(
 
 		userId, err := strconv.ParseInt(session.UserId, 10, 64)
 		if err != nil {
-			utils.LogErr(err)
+			utils.LogErr(
+				huma.Error500InternalServerError("Internal Server Error"),
+				err,
+			)
 			huma.WriteErr(
 				api,
 				ctx,
@@ -77,7 +96,10 @@ func Auth(
 				return
 			}
 
-			utils.LogErr(err)
+			utils.LogErr(
+				huma.Error500InternalServerError("Internal Server Error"),
+				err,
+			)
 
 			huma.WriteErr(
 				api,
