@@ -6,6 +6,9 @@ fmt:
 	find . -path './pg' -prune -o -type f -name '*.go' -exec go tool golines -m 80 -w {} +
 	find . -path './pg' -prune -o -type f -name '*.go' -exec go tool goimports -w {} +
 
+lint:
+	cd api && golangci-lint $(filter-out $@,$(MAKECMDGOALS))
+
 create-schema:
 ifndef name
 	$(error name is required. Usage: make create-schema name=SchemaName)
