@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/levisantosp/altamira-participa/api/db"
+	"github.com/levisantosp/altamira-participa/api/redis"
 	"github.com/levisantosp/altamira-participa/api/routes/auth"
 	"github.com/levisantosp/altamira-participa/api/routes/issues"
 	"github.com/levisantosp/altamira-participa/api/routes/users"
@@ -21,6 +22,7 @@ import (
 func main() {
 	utils.LoadEnv(".env")
 	db.Connect()
+	redis.Connect()
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)

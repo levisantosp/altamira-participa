@@ -5,11 +5,13 @@ import (
 	"testing"
 
 	"github.com/levisantosp/altamira-participa/api/db"
+	"github.com/levisantosp/altamira-participa/api/redis"
 	"github.com/levisantosp/altamira-participa/api/utils"
 )
 
 func Setup(t *testing.T) {
 	utils.LoadEnv("../../../.env.test")
+	redis.Connect()
 	sqlDB := db.Connect()
 
 	if _, err := sqlDB.Exec(`
