@@ -1,0 +1,64 @@
+name: go tests
+
+on:
+  push:
+    paths:
+      - 'api/**'
+      - 'go.work'
+      - 'go.work.sum'
+      - '.github/workflows/go-tests.yml'
+
+  pull_request:
+    paths:
+      - 'api/**'
+      - 'go.work'
+      - 'go.work.sum'
+      - '.github/workflows/go-tests.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: admin
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+      redis:
+        image: redis:latest
+        ports:
+          - 6379:6379
+        command: redis-server --requirepass redis
+        options: >-
+          --health-cmd "redis-cli -a redis ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@main
+
+      - name: setup go
+        uses: actions/setup-go@main
+        with:
+          go-version-file: go.work
+          cache-dependency-path: api/go.mod
+          cache: true
+
+      - name: create .env.test file
+        run: |
+          cp .env.test.example .env.test
+
+      - name: run tests
+        id: tests
+        run: make test
