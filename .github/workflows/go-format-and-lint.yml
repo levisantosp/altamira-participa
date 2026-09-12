@@ -38,6 +38,7 @@ jobs:
         uses: actions/setup-go@main
         with:
           go-version-file: go.work
+          cache-dependency-path: api/go.mod
           cache: true
 
       - name: setup golangci-lint
