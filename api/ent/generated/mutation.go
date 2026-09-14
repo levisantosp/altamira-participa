@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/account"
+	"github.com/levisantosp/altamira-participa/api/ent/generated/file"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/issue"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/predicate"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/upvote"
@@ -28,6 +29,7 @@ const (
 
 	// Node types.
 	TypeAccount = "Account"
+	TypeFile    = "File"
 	TypeIssue   = "Issue"
 	TypeUpvote  = "Upvote"
 	TypeUser    = "User"
@@ -616,6 +618,503 @@ func (m *AccountMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Account edge %s", name)
 }
 
+// FileMutation represents an operation that mutates the File nodes in the graph.
+type FileMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *string
+	created_at    *time.Time
+	updated_at    *time.Time
+	clearedFields map[string]struct{}
+	issue         *int64
+	clearedissue  bool
+	done          bool
+	oldValue      func(context.Context) (*File, error)
+	predicates    []predicate.File
+}
+
+var _ ent.Mutation = (*FileMutation)(nil)
+
+// fileOption allows management of the mutation configuration using functional options.
+type fileOption func(*FileMutation)
+
+// newFileMutation creates new mutation for the File entity.
+func newFileMutation(c config, op Op, opts ...fileOption) *FileMutation {
+	m := &FileMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeFile,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withFileID sets the ID field of the mutation.
+func withFileID(id string) fileOption {
+	return func(m *FileMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *File
+		)
+		m.oldValue = func(ctx context.Context) (*File, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().File.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withFile sets the old File of the mutation.
+func withFile(node *File) fileOption {
+	return func(m *FileMutation) {
+		m.oldValue = func(context.Context) (*File, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m FileMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m FileMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("generated: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of File entities.
+func (m *FileMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *FileMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *FileMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().File.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetIssueID sets the "issue_id" field.
+func (m *FileMutation) SetIssueID(i int64) {
+	m.issue = &i
+}
+
+// IssueID returns the value of the "issue_id" field in the mutation.
+func (m *FileMutation) IssueID() (r int64, exists bool) {
+	v := m.issue
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIssueID returns the old "issue_id" field's value of the File entity.
+// If the File object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FileMutation) OldIssueID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIssueID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIssueID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIssueID: %w", err)
+	}
+	return oldValue.IssueID, nil
+}
+
+// ResetIssueID resets all changes to the "issue_id" field.
+func (m *FileMutation) ResetIssueID() {
+	m.issue = nil
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *FileMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *FileMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the File entity.
+// If the File object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FileMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *FileMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *FileMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *FileMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the File entity.
+// If the File object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FileMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *FileMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// ClearIssue clears the "issue" edge to the Issue entity.
+func (m *FileMutation) ClearIssue() {
+	m.clearedissue = true
+	m.clearedFields[file.FieldIssueID] = struct{}{}
+}
+
+// IssueCleared reports if the "issue" edge to the Issue entity was cleared.
+func (m *FileMutation) IssueCleared() bool {
+	return m.clearedissue
+}
+
+// IssueIDs returns the "issue" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// IssueID instead. It exists only for internal usage by the builders.
+func (m *FileMutation) IssueIDs() (ids []int64) {
+	if id := m.issue; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetIssue resets all changes to the "issue" edge.
+func (m *FileMutation) ResetIssue() {
+	m.issue = nil
+	m.clearedissue = false
+}
+
+// Where appends a list predicates to the FileMutation builder.
+func (m *FileMutation) Where(ps ...predicate.File) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the FileMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *FileMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.File, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *FileMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *FileMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (File).
+func (m *FileMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *FileMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.issue != nil {
+		fields = append(fields, file.FieldIssueID)
+	}
+	if m.created_at != nil {
+		fields = append(fields, file.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, file.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *FileMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case file.FieldIssueID:
+		return m.IssueID()
+	case file.FieldCreatedAt:
+		return m.CreatedAt()
+	case file.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *FileMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case file.FieldIssueID:
+		return m.OldIssueID(ctx)
+	case file.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case file.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown File field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *FileMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case file.FieldIssueID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIssueID(v)
+		return nil
+	case file.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case file.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown File field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *FileMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *FileMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *FileMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown File numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *FileMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *FileMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *FileMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown File nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *FileMutation) ResetField(name string) error {
+	switch name {
+	case file.FieldIssueID:
+		m.ResetIssueID()
+		return nil
+	case file.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case file.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown File field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *FileMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.issue != nil {
+		edges = append(edges, file.EdgeIssue)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *FileMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case file.EdgeIssue:
+		if id := m.issue; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *FileMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *FileMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *FileMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedissue {
+		edges = append(edges, file.EdgeIssue)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *FileMutation) EdgeCleared(name string) bool {
+	switch name {
+	case file.EdgeIssue:
+		return m.clearedissue
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *FileMutation) ClearEdge(name string) error {
+	switch name {
+	case file.EdgeIssue:
+		m.ClearIssue()
+		return nil
+	}
+	return fmt.Errorf("unknown File unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *FileMutation) ResetEdge(name string) error {
+	switch name {
+	case file.EdgeIssue:
+		m.ResetIssue()
+		return nil
+	}
+	return fmt.Errorf("unknown File edge %s", name)
+}
+
 // IssueMutation represents an operation that mutates the Issue nodes in the graph.
 type IssueMutation struct {
 	config
@@ -635,6 +1134,9 @@ type IssueMutation struct {
 	issue_upvotes        map[int64]struct{}
 	removedissue_upvotes map[int64]struct{}
 	clearedissue_upvotes bool
+	issue_files          map[string]struct{}
+	removedissue_files   map[string]struct{}
+	clearedissue_files   bool
 	done                 bool
 	oldValue             func(context.Context) (*Issue, error)
 	predicates           []predicate.Issue
@@ -1073,6 +1575,60 @@ func (m *IssueMutation) ResetIssueUpvotes() {
 	m.removedissue_upvotes = nil
 }
 
+// AddIssueFileIDs adds the "issue_files" edge to the File entity by ids.
+func (m *IssueMutation) AddIssueFileIDs(ids ...string) {
+	if m.issue_files == nil {
+		m.issue_files = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.issue_files[ids[i]] = struct{}{}
+	}
+}
+
+// ClearIssueFiles clears the "issue_files" edge to the File entity.
+func (m *IssueMutation) ClearIssueFiles() {
+	m.clearedissue_files = true
+}
+
+// IssueFilesCleared reports if the "issue_files" edge to the File entity was cleared.
+func (m *IssueMutation) IssueFilesCleared() bool {
+	return m.clearedissue_files
+}
+
+// RemoveIssueFileIDs removes the "issue_files" edge to the File entity by IDs.
+func (m *IssueMutation) RemoveIssueFileIDs(ids ...string) {
+	if m.removedissue_files == nil {
+		m.removedissue_files = make(map[string]struct{})
+	}
+	for i := range ids {
+		delete(m.issue_files, ids[i])
+		m.removedissue_files[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedIssueFiles returns the removed IDs of the "issue_files" edge to the File entity.
+func (m *IssueMutation) RemovedIssueFilesIDs() (ids []string) {
+	for id := range m.removedissue_files {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// IssueFilesIDs returns the "issue_files" edge IDs in the mutation.
+func (m *IssueMutation) IssueFilesIDs() (ids []string) {
+	for id := range m.issue_files {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetIssueFiles resets all changes to the "issue_files" edge.
+func (m *IssueMutation) ResetIssueFiles() {
+	m.issue_files = nil
+	m.clearedissue_files = false
+	m.removedissue_files = nil
+}
+
 // Where appends a list predicates to the IssueMutation builder.
 func (m *IssueMutation) Where(ps ...predicate.Issue) {
 	m.predicates = append(m.predicates, ps...)
@@ -1306,12 +1862,15 @@ func (m *IssueMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *IssueMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.user != nil {
 		edges = append(edges, issue.EdgeUser)
 	}
 	if m.issue_upvotes != nil {
 		edges = append(edges, issue.EdgeIssueUpvotes)
+	}
+	if m.issue_files != nil {
+		edges = append(edges, issue.EdgeIssueFiles)
 	}
 	return edges
 }
@@ -1330,15 +1889,24 @@ func (m *IssueMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case issue.EdgeIssueFiles:
+		ids := make([]ent.Value, 0, len(m.issue_files))
+		for id := range m.issue_files {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *IssueMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.removedissue_upvotes != nil {
 		edges = append(edges, issue.EdgeIssueUpvotes)
+	}
+	if m.removedissue_files != nil {
+		edges = append(edges, issue.EdgeIssueFiles)
 	}
 	return edges
 }
@@ -1353,18 +1921,27 @@ func (m *IssueMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case issue.EdgeIssueFiles:
+		ids := make([]ent.Value, 0, len(m.removedissue_files))
+		for id := range m.removedissue_files {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *IssueMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.cleareduser {
 		edges = append(edges, issue.EdgeUser)
 	}
 	if m.clearedissue_upvotes {
 		edges = append(edges, issue.EdgeIssueUpvotes)
+	}
+	if m.clearedissue_files {
+		edges = append(edges, issue.EdgeIssueFiles)
 	}
 	return edges
 }
@@ -1377,6 +1954,8 @@ func (m *IssueMutation) EdgeCleared(name string) bool {
 		return m.cleareduser
 	case issue.EdgeIssueUpvotes:
 		return m.clearedissue_upvotes
+	case issue.EdgeIssueFiles:
+		return m.clearedissue_files
 	}
 	return false
 }
@@ -1401,6 +1980,9 @@ func (m *IssueMutation) ResetEdge(name string) error {
 		return nil
 	case issue.EdgeIssueUpvotes:
 		m.ResetIssueUpvotes()
+		return nil
+	case issue.EdgeIssueFiles:
+		m.ResetIssueFiles()
 		return nil
 	}
 	return fmt.Errorf("unknown Issue edge %s", name)

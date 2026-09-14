@@ -31,6 +31,27 @@ var (
 			},
 		},
 	}
+	// FilesColumns holds the columns for the "files" table.
+	FilesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "issue_id", Type: field.TypeInt64},
+	}
+	// FilesTable holds the schema information for the "files" table.
+	FilesTable = &schema.Table{
+		Name:       "files",
+		Columns:    FilesColumns,
+		PrimaryKey: []*schema.Column{FilesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "files_issues_issue",
+				Columns:    []*schema.Column{FilesColumns[3]},
+				RefColumns: []*schema.Column{IssuesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// IssuesColumns holds the columns for the "issues" table.
 	IssuesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt64, Increment: true},
@@ -104,6 +125,7 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		AccountsTable,
+		FilesTable,
 		IssuesTable,
 		UpvotesTable,
 		UsersTable,
@@ -112,6 +134,7 @@ var (
 
 func init() {
 	AccountsTable.ForeignKeys[0].RefTable = UsersTable
+	FilesTable.ForeignKeys[0].RefTable = IssuesTable
 	IssuesTable.ForeignKeys[0].RefTable = UsersTable
 	UpvotesTable.ForeignKeys[0].RefTable = IssuesTable
 }

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/levisantosp/altamira-participa/api/ent/generated/account"
+	"github.com/levisantosp/altamira-participa/api/ent/generated/file"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/issue"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/upvote"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/user"
@@ -28,6 +29,22 @@ func init() {
 	account.DefaultUpdatedAt = accountDescUpdatedAt.Default.(func() time.Time)
 	// account.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	account.UpdateDefaultUpdatedAt = accountDescUpdatedAt.UpdateDefault.(func() time.Time)
+	fileFields := schema.File{}.Fields()
+	_ = fileFields
+	// fileDescCreatedAt is the schema descriptor for created_at field.
+	fileDescCreatedAt := fileFields[2].Descriptor()
+	// file.DefaultCreatedAt holds the default value on creation for the created_at field.
+	file.DefaultCreatedAt = fileDescCreatedAt.Default.(func() time.Time)
+	// fileDescUpdatedAt is the schema descriptor for updated_at field.
+	fileDescUpdatedAt := fileFields[3].Descriptor()
+	// file.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	file.DefaultUpdatedAt = fileDescUpdatedAt.Default.(func() time.Time)
+	// file.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	file.UpdateDefaultUpdatedAt = fileDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// fileDescID is the schema descriptor for id field.
+	fileDescID := fileFields[0].Descriptor()
+	// file.DefaultID holds the default value on creation for the id field.
+	file.DefaultID = fileDescID.Default.(func() string)
 	issueFields := schema.Issue{}.Fields()
 	_ = issueFields
 	// issueDescTitle is the schema descriptor for title field.

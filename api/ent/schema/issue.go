@@ -38,5 +38,6 @@ func (Issue) Edges() []ent.Edge {
 			Required().
 			Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.From("issue_upvotes", Upvote.Type).Ref("issue"),
+		edge.From("issue_files", File.Type).Ref("issue"),
 	}
 }

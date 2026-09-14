@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/levisantosp/altamira-participa/api/ent/generated/file"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/issue"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/predicate"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/upvote"
@@ -27,6 +28,7 @@ type IssueQuery struct {
 	predicates       []predicate.Issue
 	withUser         *UserQuery
 	withIssueUpvotes *UpvoteQuery
+	withIssueFiles   *FileQuery
 	withFKs          bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -101,6 +103,28 @@ func (_q *IssueQuery) QueryIssueUpvotes() *UpvoteQuery {
 			sqlgraph.From(issue.Table, issue.FieldID, selector),
 			sqlgraph.To(upvote.Table, upvote.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, issue.IssueUpvotesTable, issue.IssueUpvotesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryIssueFiles chains the current query on the "issue_files" edge.
+func (_q *IssueQuery) QueryIssueFiles() *FileQuery {
+	query := (&FileClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(issue.Table, issue.FieldID, selector),
+			sqlgraph.To(file.Table, file.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, issue.IssueFilesTable, issue.IssueFilesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -302,6 +326,7 @@ func (_q *IssueQuery) Clone() *IssueQuery {
 		predicates:       append([]predicate.Issue{}, _q.predicates...),
 		withUser:         _q.withUser.Clone(),
 		withIssueUpvotes: _q.withIssueUpvotes.Clone(),
+		withIssueFiles:   _q.withIssueFiles.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -327,6 +352,17 @@ func (_q *IssueQuery) WithIssueUpvotes(opts ...func(*UpvoteQuery)) *IssueQuery {
 		opt(query)
 	}
 	_q.withIssueUpvotes = query
+	return _q
+}
+
+// WithIssueFiles tells the query-builder to eager-load the nodes that are connected to
+// the "issue_files" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *IssueQuery) WithIssueFiles(opts ...func(*FileQuery)) *IssueQuery {
+	query := (&FileClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withIssueFiles = query
 	return _q
 }
 
@@ -409,9 +445,10 @@ func (_q *IssueQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Issue,
 		nodes       = []*Issue{}
 		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			_q.withUser != nil,
 			_q.withIssueUpvotes != nil,
+			_q.withIssueFiles != nil,
 		}
 	)
 	if _q.withUser != nil {
@@ -451,6 +488,13 @@ func (_q *IssueQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Issue,
 			return nil, err
 		}
 	}
+	if query := _q.withIssueFiles; query != nil {
+		if err := _q.loadIssueFiles(ctx, query, nodes,
+			func(n *Issue) { n.Edges.IssueFiles = []*File{} },
+			func(n *Issue, e *File) { n.Edges.IssueFiles = append(n.Edges.IssueFiles, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -486,7 +530,6 @@ func (_q *IssueQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*I
 	}
 	return nil
 }
-
 func (_q *IssueQuery) loadIssueUpvotes(ctx context.Context, query *UpvoteQuery, nodes []*Issue, init func(*Issue), assign func(*Issue, *Upvote)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int64]*Issue)
@@ -502,6 +545,36 @@ func (_q *IssueQuery) loadIssueUpvotes(ctx context.Context, query *UpvoteQuery, 
 	}
 	query.Where(predicate.Upvote(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(issue.IssueUpvotesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.IssueID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "issue_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *IssueQuery) loadIssueFiles(ctx context.Context, query *FileQuery, nodes []*Issue, init func(*Issue), assign func(*Issue, *File)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int64]*Issue)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(file.FieldIssueID)
+	}
+	query.Where(predicate.File(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(issue.IssueFilesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

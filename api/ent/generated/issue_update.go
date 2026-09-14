@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/levisantosp/altamira-participa/api/ent/generated/file"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/issue"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/predicate"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/upvote"
@@ -125,6 +126,21 @@ func (_u *IssueUpdate) AddIssueUpvotes(v ...*Upvote) *IssueUpdate {
 	return _u.AddIssueUpvoteIDs(ids...)
 }
 
+// AddIssueFileIDs adds the "issue_files" edge to the File entity by IDs.
+func (_u *IssueUpdate) AddIssueFileIDs(ids ...string) *IssueUpdate {
+	_u.mutation.AddIssueFileIDs(ids...)
+	return _u
+}
+
+// AddIssueFiles adds the "issue_files" edges to the File entity.
+func (_u *IssueUpdate) AddIssueFiles(v ...*File) *IssueUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddIssueFileIDs(ids...)
+}
+
 // Mutation returns the IssueMutation object of the builder.
 func (_u *IssueUpdate) Mutation() *IssueMutation {
 	return _u.mutation
@@ -155,6 +171,27 @@ func (_u *IssueUpdate) RemoveIssueUpvotes(v ...*Upvote) *IssueUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveIssueUpvoteIDs(ids...)
+}
+
+// ClearIssueFiles clears all "issue_files" edges to the File entity.
+func (_u *IssueUpdate) ClearIssueFiles() *IssueUpdate {
+	_u.mutation.ClearIssueFiles()
+	return _u
+}
+
+// RemoveIssueFileIDs removes the "issue_files" edge to File entities by IDs.
+func (_u *IssueUpdate) RemoveIssueFileIDs(ids ...string) *IssueUpdate {
+	_u.mutation.RemoveIssueFileIDs(ids...)
+	return _u
+}
+
+// RemoveIssueFiles removes "issue_files" edges to File entities.
+func (_u *IssueUpdate) RemoveIssueFiles(v ...*File) *IssueUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveIssueFileIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -320,6 +357,51 @@ func (_u *IssueUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.IssueFilesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   issue.IssueFilesTable,
+			Columns: []string{issue.IssueFilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedIssueFilesIDs(); len(nodes) > 0 && !_u.mutation.IssueFilesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   issue.IssueFilesTable,
+			Columns: []string{issue.IssueFilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.IssueFilesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   issue.IssueFilesTable,
+			Columns: []string{issue.IssueFilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{issue.Label}
@@ -435,6 +517,21 @@ func (_u *IssueUpdateOne) AddIssueUpvotes(v ...*Upvote) *IssueUpdateOne {
 	return _u.AddIssueUpvoteIDs(ids...)
 }
 
+// AddIssueFileIDs adds the "issue_files" edge to the File entity by IDs.
+func (_u *IssueUpdateOne) AddIssueFileIDs(ids ...string) *IssueUpdateOne {
+	_u.mutation.AddIssueFileIDs(ids...)
+	return _u
+}
+
+// AddIssueFiles adds the "issue_files" edges to the File entity.
+func (_u *IssueUpdateOne) AddIssueFiles(v ...*File) *IssueUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddIssueFileIDs(ids...)
+}
+
 // Mutation returns the IssueMutation object of the builder.
 func (_u *IssueUpdateOne) Mutation() *IssueMutation {
 	return _u.mutation
@@ -465,6 +562,27 @@ func (_u *IssueUpdateOne) RemoveIssueUpvotes(v ...*Upvote) *IssueUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveIssueUpvoteIDs(ids...)
+}
+
+// ClearIssueFiles clears all "issue_files" edges to the File entity.
+func (_u *IssueUpdateOne) ClearIssueFiles() *IssueUpdateOne {
+	_u.mutation.ClearIssueFiles()
+	return _u
+}
+
+// RemoveIssueFileIDs removes the "issue_files" edge to File entities by IDs.
+func (_u *IssueUpdateOne) RemoveIssueFileIDs(ids ...string) *IssueUpdateOne {
+	_u.mutation.RemoveIssueFileIDs(ids...)
+	return _u
+}
+
+// RemoveIssueFiles removes "issue_files" edges to File entities.
+func (_u *IssueUpdateOne) RemoveIssueFiles(v ...*File) *IssueUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveIssueFileIDs(ids...)
 }
 
 // Where appends a list predicates to the IssueUpdate builder.
@@ -653,6 +771,51 @@ func (_u *IssueUpdateOne) sqlSave(ctx context.Context) (_node *Issue, err error)
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(upvote.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.IssueFilesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   issue.IssueFilesTable,
+			Columns: []string{issue.IssueFilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedIssueFilesIDs(); len(nodes) > 0 && !_u.mutation.IssueFilesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   issue.IssueFilesTable,
+			Columns: []string{issue.IssueFilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.IssueFilesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   issue.IssueFilesTable,
+			Columns: []string{issue.IssueFilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

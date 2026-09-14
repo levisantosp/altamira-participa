@@ -14,6 +14,8 @@ type Tx struct {
 	config
 	// Account is the client for interacting with the Account builders.
 	Account *AccountClient
+	// File is the client for interacting with the File builders.
+	File *FileClient
 	// Issue is the client for interacting with the Issue builders.
 	Issue *IssueClient
 	// Upvote is the client for interacting with the Upvote builders.
@@ -152,6 +154,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Account = NewAccountClient(tx.config)
+	tx.File = NewFileClient(tx.config)
 	tx.Issue = NewIssueClient(tx.config)
 	tx.Upvote = NewUpvoteClient(tx.config)
 	tx.User = NewUserClient(tx.config)

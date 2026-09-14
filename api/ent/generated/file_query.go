@@ -4,7 +4,6 @@ package generated
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -12,81 +11,57 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/levisantosp/altamira-participa/api/ent/generated/account"
+	"github.com/levisantosp/altamira-participa/api/ent/generated/file"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/issue"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/predicate"
-	"github.com/levisantosp/altamira-participa/api/ent/generated/user"
 )
 
-// UserQuery is the builder for querying User entities.
-type UserQuery struct {
+// FileQuery is the builder for querying File entities.
+type FileQuery struct {
 	config
-	ctx          *QueryContext
-	order        []user.OrderOption
-	inters       []Interceptor
-	predicates   []predicate.User
-	withAccounts *AccountQuery
-	withIssues   *IssueQuery
+	ctx        *QueryContext
+	order      []file.OrderOption
+	inters     []Interceptor
+	predicates []predicate.File
+	withIssue  *IssueQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the UserQuery builder.
-func (_q *UserQuery) Where(ps ...predicate.User) *UserQuery {
+// Where adds a new predicate for the FileQuery builder.
+func (_q *FileQuery) Where(ps ...predicate.File) *FileQuery {
 	_q.predicates = append(_q.predicates, ps...)
 	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *UserQuery) Limit(limit int) *UserQuery {
+func (_q *FileQuery) Limit(limit int) *FileQuery {
 	_q.ctx.Limit = &limit
 	return _q
 }
 
 // Offset to start from.
-func (_q *UserQuery) Offset(offset int) *UserQuery {
+func (_q *FileQuery) Offset(offset int) *FileQuery {
 	_q.ctx.Offset = &offset
 	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *UserQuery) Unique(unique bool) *UserQuery {
+func (_q *FileQuery) Unique(unique bool) *FileQuery {
 	_q.ctx.Unique = &unique
 	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (_q *UserQuery) Order(o ...user.OrderOption) *UserQuery {
+func (_q *FileQuery) Order(o ...file.OrderOption) *FileQuery {
 	_q.order = append(_q.order, o...)
 	return _q
 }
 
-// QueryAccounts chains the current query on the "accounts" edge.
-func (_q *UserQuery) QueryAccounts() *AccountQuery {
-	query := (&AccountClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(account.Table, account.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.AccountsTable, user.AccountsColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryIssues chains the current query on the "issues" edge.
-func (_q *UserQuery) QueryIssues() *IssueQuery {
+// QueryIssue chains the current query on the "issue" edge.
+func (_q *FileQuery) QueryIssue() *IssueQuery {
 	query := (&IssueClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
@@ -97,9 +72,9 @@ func (_q *UserQuery) QueryIssues() *IssueQuery {
 			return nil, err
 		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.From(file.Table, file.FieldID, selector),
 			sqlgraph.To(issue.Table, issue.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.IssuesTable, user.IssuesColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, file.IssueTable, file.IssueColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -107,21 +82,21 @@ func (_q *UserQuery) QueryIssues() *IssueQuery {
 	return query
 }
 
-// First returns the first User entity from the query.
-// Returns a *NotFoundError when no User was found.
-func (_q *UserQuery) First(ctx context.Context) (*User, error) {
+// First returns the first File entity from the query.
+// Returns a *NotFoundError when no File was found.
+func (_q *FileQuery) First(ctx context.Context) (*File, error) {
 	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{user.Label}
+		return nil, &NotFoundError{file.Label}
 	}
 	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (_q *UserQuery) FirstX(ctx context.Context) *User {
+func (_q *FileQuery) FirstX(ctx context.Context) *File {
 	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -129,22 +104,22 @@ func (_q *UserQuery) FirstX(ctx context.Context) *User {
 	return node
 }
 
-// FirstID returns the first User ID from the query.
-// Returns a *NotFoundError when no User ID was found.
-func (_q *UserQuery) FirstID(ctx context.Context) (id int64, err error) {
-	var ids []int64
+// FirstID returns the first File ID from the query.
+// Returns a *NotFoundError when no File ID was found.
+func (_q *FileQuery) FirstID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{user.Label}
+		err = &NotFoundError{file.Label}
 		return
 	}
 	return ids[0], nil
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *UserQuery) FirstIDX(ctx context.Context) int64 {
+func (_q *FileQuery) FirstIDX(ctx context.Context) string {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -152,10 +127,10 @@ func (_q *UserQuery) FirstIDX(ctx context.Context) int64 {
 	return id
 }
 
-// Only returns a single User entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when more than one User entity is found.
-// Returns a *NotFoundError when no User entities are found.
-func (_q *UserQuery) Only(ctx context.Context) (*User, error) {
+// Only returns a single File entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when more than one File entity is found.
+// Returns a *NotFoundError when no File entities are found.
+func (_q *FileQuery) Only(ctx context.Context) (*File, error) {
 	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
@@ -164,14 +139,14 @@ func (_q *UserQuery) Only(ctx context.Context) (*User, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{user.Label}
+		return nil, &NotFoundError{file.Label}
 	default:
-		return nil, &NotSingularError{user.Label}
+		return nil, &NotSingularError{file.Label}
 	}
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *UserQuery) OnlyX(ctx context.Context) *User {
+func (_q *FileQuery) OnlyX(ctx context.Context) *File {
 	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
@@ -179,11 +154,11 @@ func (_q *UserQuery) OnlyX(ctx context.Context) *User {
 	return node
 }
 
-// OnlyID is like Only, but returns the only User ID in the query.
-// Returns a *NotSingularError when more than one User ID is found.
+// OnlyID is like Only, but returns the only File ID in the query.
+// Returns a *NotSingularError when more than one File ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *UserQuery) OnlyID(ctx context.Context) (id int64, err error) {
-	var ids []int64
+func (_q *FileQuery) OnlyID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -191,15 +166,15 @@ func (_q *UserQuery) OnlyID(ctx context.Context) (id int64, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{user.Label}
+		err = &NotFoundError{file.Label}
 	default:
-		err = &NotSingularError{user.Label}
+		err = &NotSingularError{file.Label}
 	}
 	return
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *UserQuery) OnlyIDX(ctx context.Context) int64 {
+func (_q *FileQuery) OnlyIDX(ctx context.Context) string {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -207,18 +182,18 @@ func (_q *UserQuery) OnlyIDX(ctx context.Context) int64 {
 	return id
 }
 
-// All executes the query and returns a list of Users.
-func (_q *UserQuery) All(ctx context.Context) ([]*User, error) {
+// All executes the query and returns a list of Files.
+func (_q *FileQuery) All(ctx context.Context) ([]*File, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	qr := querierAll[[]*User, *UserQuery]()
-	return withInterceptors[[]*User](ctx, _q, qr, _q.inters)
+	qr := querierAll[[]*File, *FileQuery]()
+	return withInterceptors[[]*File](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *UserQuery) AllX(ctx context.Context) []*User {
+func (_q *FileQuery) AllX(ctx context.Context) []*File {
 	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
@@ -226,20 +201,20 @@ func (_q *UserQuery) AllX(ctx context.Context) []*User {
 	return nodes
 }
 
-// IDs executes the query and returns a list of User IDs.
-func (_q *UserQuery) IDs(ctx context.Context) (ids []int64, err error) {
+// IDs executes the query and returns a list of File IDs.
+func (_q *FileQuery) IDs(ctx context.Context) (ids []string, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
-	if err = _q.Select(user.FieldID).Scan(ctx, &ids); err != nil {
+	if err = _q.Select(file.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *UserQuery) IDsX(ctx context.Context) []int64 {
+func (_q *FileQuery) IDsX(ctx context.Context) []string {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -248,16 +223,16 @@ func (_q *UserQuery) IDsX(ctx context.Context) []int64 {
 }
 
 // Count returns the count of the given query.
-func (_q *UserQuery) Count(ctx context.Context) (int, error) {
+func (_q *FileQuery) Count(ctx context.Context) (int, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, _q, querierCount[*UserQuery](), _q.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*FileQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *UserQuery) CountX(ctx context.Context) int {
+func (_q *FileQuery) CountX(ctx context.Context) int {
 	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
@@ -266,7 +241,7 @@ func (_q *UserQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (_q *UserQuery) Exist(ctx context.Context) (bool, error) {
+func (_q *FileQuery) Exist(ctx context.Context) (bool, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
 	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
@@ -279,7 +254,7 @@ func (_q *UserQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *UserQuery) ExistX(ctx context.Context) bool {
+func (_q *FileQuery) ExistX(ctx context.Context) bool {
 	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
@@ -287,45 +262,33 @@ func (_q *UserQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the UserQuery builder, including all associated steps. It can be
+// Clone returns a duplicate of the FileQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (_q *UserQuery) Clone() *UserQuery {
+func (_q *FileQuery) Clone() *FileQuery {
 	if _q == nil {
 		return nil
 	}
-	return &UserQuery{
-		config:       _q.config,
-		ctx:          _q.ctx.Clone(),
-		order:        append([]user.OrderOption{}, _q.order...),
-		inters:       append([]Interceptor{}, _q.inters...),
-		predicates:   append([]predicate.User{}, _q.predicates...),
-		withAccounts: _q.withAccounts.Clone(),
-		withIssues:   _q.withIssues.Clone(),
+	return &FileQuery{
+		config:     _q.config,
+		ctx:        _q.ctx.Clone(),
+		order:      append([]file.OrderOption{}, _q.order...),
+		inters:     append([]Interceptor{}, _q.inters...),
+		predicates: append([]predicate.File{}, _q.predicates...),
+		withIssue:  _q.withIssue.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
 }
 
-// WithAccounts tells the query-builder to eager-load the nodes that are connected to
-// the "accounts" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *UserQuery) WithAccounts(opts ...func(*AccountQuery)) *UserQuery {
-	query := (&AccountClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withAccounts = query
-	return _q
-}
-
-// WithIssues tells the query-builder to eager-load the nodes that are connected to
-// the "issues" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *UserQuery) WithIssues(opts ...func(*IssueQuery)) *UserQuery {
+// WithIssue tells the query-builder to eager-load the nodes that are connected to
+// the "issue" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *FileQuery) WithIssue(opts ...func(*IssueQuery)) *FileQuery {
 	query := (&IssueClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withIssues = query
+	_q.withIssue = query
 	return _q
 }
 
@@ -335,19 +298,19 @@ func (_q *UserQuery) WithIssues(opts ...func(*IssueQuery)) *UserQuery {
 // Example:
 //
 //	var v []struct {
-//		Username string `json:"username,omitempty"`
+//		IssueID int64 `json:"issue_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.User.Query().
-//		GroupBy(user.FieldUsername).
+//	client.File.Query().
+//		GroupBy(file.FieldIssueID).
 //		Aggregate(generated.Count()).
 //		Scan(ctx, &v)
-func (_q *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
+func (_q *FileQuery) GroupBy(field string, fields ...string) *FileGroupBy {
 	_q.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &UserGroupBy{build: _q}
+	grbuild := &FileGroupBy{build: _q}
 	grbuild.flds = &_q.ctx.Fields
-	grbuild.label = user.Label
+	grbuild.label = file.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
 }
@@ -358,26 +321,26 @@ func (_q *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Username string `json:"username,omitempty"`
+//		IssueID int64 `json:"issue_id,omitempty"`
 //	}
 //
-//	client.User.Query().
-//		Select(user.FieldUsername).
+//	client.File.Query().
+//		Select(file.FieldIssueID).
 //		Scan(ctx, &v)
-func (_q *UserQuery) Select(fields ...string) *UserSelect {
+func (_q *FileQuery) Select(fields ...string) *FileSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
-	sbuild := &UserSelect{UserQuery: _q}
-	sbuild.label = user.Label
+	sbuild := &FileSelect{FileQuery: _q}
+	sbuild.label = file.Label
 	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
-// Aggregate returns a UserSelect configured with the given aggregations.
-func (_q *UserQuery) Aggregate(fns ...AggregateFunc) *UserSelect {
+// Aggregate returns a FileSelect configured with the given aggregations.
+func (_q *FileQuery) Aggregate(fns ...AggregateFunc) *FileSelect {
 	return _q.Select().Aggregate(fns...)
 }
 
-func (_q *UserQuery) prepareQuery(ctx context.Context) error {
+func (_q *FileQuery) prepareQuery(ctx context.Context) error {
 	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("generated: uninitialized interceptor (forgotten import generated/runtime?)")
@@ -389,7 +352,7 @@ func (_q *UserQuery) prepareQuery(ctx context.Context) error {
 		}
 	}
 	for _, f := range _q.ctx.Fields {
-		if !user.ValidColumn(f) {
+		if !file.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("generated: invalid field %q for query", f)}
 		}
 	}
@@ -403,20 +366,19 @@ func (_q *UserQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, error) {
+func (_q *FileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*File, error) {
 	var (
-		nodes       = []*User{}
+		nodes       = []*File{}
 		_spec       = _q.querySpec()
-		loadedTypes = [2]bool{
-			_q.withAccounts != nil,
-			_q.withIssues != nil,
+		loadedTypes = [1]bool{
+			_q.withIssue != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*User).scanValues(nil, columns)
+		return (*File).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &User{config: _q.config}
+		node := &File{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -430,87 +392,46 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := _q.withAccounts; query != nil {
-		if err := _q.loadAccounts(ctx, query, nodes,
-			func(n *User) { n.Edges.Accounts = []*Account{} },
-			func(n *User, e *Account) { n.Edges.Accounts = append(n.Edges.Accounts, e) }); err != nil {
-			return nil, err
-		}
-	}
-	if query := _q.withIssues; query != nil {
-		if err := _q.loadIssues(ctx, query, nodes,
-			func(n *User) { n.Edges.Issues = []*Issue{} },
-			func(n *User, e *Issue) { n.Edges.Issues = append(n.Edges.Issues, e) }); err != nil {
+	if query := _q.withIssue; query != nil {
+		if err := _q.loadIssue(ctx, query, nodes, nil,
+			func(n *File, e *Issue) { n.Edges.Issue = e }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (_q *UserQuery) loadAccounts(ctx context.Context, query *AccountQuery, nodes []*User, init func(*User), assign func(*User, *Account)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int64]*User)
+func (_q *FileQuery) loadIssue(ctx context.Context, query *IssueQuery, nodes []*File, init func(*File), assign func(*File, *Issue)) error {
+	ids := make([]int64, 0, len(nodes))
+	nodeids := make(map[int64][]*File)
 	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
+		fk := nodes[i].IssueID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
 		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	query.withFKs = true
-	query.Where(predicate.Account(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.AccountsColumn), fks...))
-	}))
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(issue.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.user_accounts
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "user_accounts" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "user_accounts" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "issue_id" returned %v`, n.ID)
 		}
-		assign(node, n)
-	}
-	return nil
-}
-func (_q *UserQuery) loadIssues(ctx context.Context, query *IssueQuery, nodes []*User, init func(*User), assign func(*User, *Issue)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int64]*User)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
-	}
-	query.withFKs = true
-	query.Where(predicate.Issue(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.IssuesColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.user_issues
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "user_issues" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "user_issues" returned %v for node %v`, *fk, n.ID)
-		}
-		assign(node, n)
 	}
 	return nil
 }
 
-func (_q *UserQuery) sqlCount(ctx context.Context) (int, error) {
+func (_q *FileQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
@@ -519,8 +440,8 @@ func (_q *UserQuery) sqlCount(ctx context.Context) (int, error) {
 	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (_q *UserQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt64))
+func (_q *FileQuery) querySpec() *sqlgraph.QuerySpec {
+	_spec := sqlgraph.NewQuerySpec(file.Table, file.Columns, sqlgraph.NewFieldSpec(file.FieldID, field.TypeString))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -529,11 +450,14 @@ func (_q *UserQuery) querySpec() *sqlgraph.QuerySpec {
 	}
 	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, user.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, file.FieldID)
 		for i := range fields {
-			if fields[i] != user.FieldID {
+			if fields[i] != file.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if _q.withIssue != nil {
+			_spec.Node.AddColumnOnce(file.FieldIssueID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {
@@ -559,12 +483,12 @@ func (_q *UserQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (_q *UserQuery) sqlQuery(ctx context.Context) *sql.Selector {
+func (_q *FileQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(_q.driver.Dialect())
-	t1 := builder.Table(user.Table)
+	t1 := builder.Table(file.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
-		columns = user.Columns
+		columns = file.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if _q.sql != nil {
@@ -591,28 +515,28 @@ func (_q *UserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
-// UserGroupBy is the group-by builder for User entities.
-type UserGroupBy struct {
+// FileGroupBy is the group-by builder for File entities.
+type FileGroupBy struct {
 	selector
-	build *UserQuery
+	build *FileQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (_g *UserGroupBy) Aggregate(fns ...AggregateFunc) *UserGroupBy {
+func (_g *FileGroupBy) Aggregate(fns ...AggregateFunc) *FileGroupBy {
 	_g.fns = append(_g.fns, fns...)
 	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_g *UserGroupBy) Scan(ctx context.Context, v any) error {
+func (_g *FileGroupBy) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
 	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*UserQuery, *UserGroupBy](ctx, _g.build, _g, _g.build.inters, v)
+	return scanWithInterceptors[*FileQuery, *FileGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (_g *UserGroupBy) sqlScan(ctx context.Context, root *UserQuery, v any) error {
+func (_g *FileGroupBy) sqlScan(ctx context.Context, root *FileQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
 	aggregation := make([]string, 0, len(_g.fns))
 	for _, fn := range _g.fns {
@@ -639,28 +563,28 @@ func (_g *UserGroupBy) sqlScan(ctx context.Context, root *UserQuery, v any) erro
 	return sql.ScanSlice(rows, v)
 }
 
-// UserSelect is the builder for selecting fields of User entities.
-type UserSelect struct {
-	*UserQuery
+// FileSelect is the builder for selecting fields of File entities.
+type FileSelect struct {
+	*FileQuery
 	selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (_s *UserSelect) Aggregate(fns ...AggregateFunc) *UserSelect {
+func (_s *FileSelect) Aggregate(fns ...AggregateFunc) *FileSelect {
 	_s.fns = append(_s.fns, fns...)
 	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_s *UserSelect) Scan(ctx context.Context, v any) error {
+func (_s *FileSelect) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
 	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*UserQuery, *UserSelect](ctx, _s.UserQuery, _s, _s.inters, v)
+	return scanWithInterceptors[*FileQuery, *FileSelect](ctx, _s.FileQuery, _s, _s.inters, v)
 }
 
-func (_s *UserSelect) sqlScan(ctx context.Context, root *UserQuery, v any) error {
+func (_s *FileSelect) sqlScan(ctx context.Context, root *FileQuery, v any) error {
 	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(_s.fns))
 	for _, fn := range _s.fns {

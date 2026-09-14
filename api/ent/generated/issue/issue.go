@@ -31,6 +31,8 @@ const (
 	EdgeUser = "user"
 	// EdgeIssueUpvotes holds the string denoting the issue_upvotes edge name in mutations.
 	EdgeIssueUpvotes = "issue_upvotes"
+	// EdgeIssueFiles holds the string denoting the issue_files edge name in mutations.
+	EdgeIssueFiles = "issue_files"
 	// Table holds the table name of the issue in the database.
 	Table = "issues"
 	// UserTable is the table that holds the user relation/edge.
@@ -47,6 +49,13 @@ const (
 	IssueUpvotesInverseTable = "upvotes"
 	// IssueUpvotesColumn is the table column denoting the issue_upvotes relation/edge.
 	IssueUpvotesColumn = "issue_id"
+	// IssueFilesTable is the table that holds the issue_files relation/edge.
+	IssueFilesTable = "files"
+	// IssueFilesInverseTable is the table name for the File entity.
+	// It exists in this package in order to avoid circular dependency with the "file" package.
+	IssueFilesInverseTable = "files"
+	// IssueFilesColumn is the table column denoting the issue_files relation/edge.
+	IssueFilesColumn = "issue_id"
 )
 
 // Columns holds all SQL columns for issue fields.
@@ -182,6 +191,19 @@ func ByIssueUpvotes(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByIssueFilesCount orders the results by issue_files count.
+func ByIssueFilesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newIssueFilesStep(), opts...)
+	}
+}
+
+// ByIssueFiles orders the results by issue_files terms.
+func ByIssueFiles(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newIssueFilesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -189,11 +211,17 @@ func newUserStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
 	)
 }
-
 func newIssueUpvotesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(IssueUpvotesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, true, IssueUpvotesTable, IssueUpvotesColumn),
+	)
+}
+func newIssueFilesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(IssueFilesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, IssueFilesTable, IssueFilesColumn),
 	)
 }

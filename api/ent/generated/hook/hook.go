@@ -21,6 +21,18 @@ func (f AccountFunc) Mutate(ctx context.Context, m generated.Mutation) (generate
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *generated.AccountMutation", m)
 }
 
+// The FileFunc type is an adapter to allow the use of ordinary
+// function as File mutator.
+type FileFunc func(context.Context, *generated.FileMutation) (generated.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f FileFunc) Mutate(ctx context.Context, m generated.Mutation) (generated.Value, error) {
+	if mv, ok := m.(*generated.FileMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *generated.FileMutation", m)
+}
+
 // The IssueFunc type is an adapter to allow the use of ordinary
 // function as Issue mutator.
 type IssueFunc func(context.Context, *generated.IssueMutation) (generated.Value, error)

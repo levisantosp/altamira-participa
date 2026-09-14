@@ -43,9 +43,11 @@ type IssueEdges struct {
 	User *User `json:"user,omitempty"`
 	// IssueUpvotes holds the value of the issue_upvotes edge.
 	IssueUpvotes []*Upvote `json:"issue_upvotes,omitempty"`
+	// IssueFiles holds the value of the issue_files edge.
+	IssueFiles []*File `json:"issue_files,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -66,6 +68,15 @@ func (e IssueEdges) IssueUpvotesOrErr() ([]*Upvote, error) {
 		return e.IssueUpvotes, nil
 	}
 	return nil, &NotLoadedError{edge: "issue_upvotes"}
+}
+
+// IssueFilesOrErr returns the IssueFiles value or an error if the edge
+// was not loaded in eager-loading.
+func (e IssueEdges) IssueFilesOrErr() ([]*File, error) {
+	if e.loadedTypes[2] {
+		return e.IssueFiles, nil
+	}
+	return nil, &NotLoadedError{edge: "issue_files"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -166,6 +177,11 @@ func (_m *Issue) QueryUser() *UserQuery {
 // QueryIssueUpvotes queries the "issue_upvotes" edge of the Issue entity.
 func (_m *Issue) QueryIssueUpvotes() *UpvoteQuery {
 	return NewIssueClient(_m.config).QueryIssueUpvotes(_m)
+}
+
+// QueryIssueFiles queries the "issue_files" edge of the Issue entity.
+func (_m *Issue) QueryIssueFiles() *FileQuery {
+	return NewIssueClient(_m.config).QueryIssueFiles(_m)
 }
 
 // Update returns a builder for updating this Issue.

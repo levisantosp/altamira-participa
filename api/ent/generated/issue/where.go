@@ -396,6 +396,29 @@ func HasIssueUpvotesWith(preds ...predicate.Upvote) predicate.Issue {
 	})
 }
 
+// HasIssueFiles applies the HasEdge predicate on the "issue_files" edge.
+func HasIssueFiles() predicate.Issue {
+	return predicate.Issue(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, IssueFilesTable, IssueFilesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasIssueFilesWith applies the HasEdge predicate on the "issue_files" edge with a given conditions (other predicates).
+func HasIssueFilesWith(preds ...predicate.File) predicate.Issue {
+	return predicate.Issue(func(s *sql.Selector) {
+		step := newIssueFilesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Issue) predicate.Issue {
 	return predicate.Issue(sql.AndPredicates(predicates...))

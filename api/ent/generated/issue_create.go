@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/levisantosp/altamira-participa/api/ent/generated/file"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/issue"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/upvote"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/user"
@@ -120,6 +121,21 @@ func (_c *IssueCreate) AddIssueUpvotes(v ...*Upvote) *IssueCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddIssueUpvoteIDs(ids...)
+}
+
+// AddIssueFileIDs adds the "issue_files" edge to the File entity by IDs.
+func (_c *IssueCreate) AddIssueFileIDs(ids ...string) *IssueCreate {
+	_c.mutation.AddIssueFileIDs(ids...)
+	return _c
+}
+
+// AddIssueFiles adds the "issue_files" edges to the File entity.
+func (_c *IssueCreate) AddIssueFiles(v ...*File) *IssueCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddIssueFileIDs(ids...)
 }
 
 // Mutation returns the IssueMutation object of the builder.
@@ -295,6 +311,22 @@ func (_c *IssueCreate) createSpec() (*Issue, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(upvote.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.IssueFilesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   issue.IssueFilesTable,
+			Columns: []string{issue.IssueFilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
