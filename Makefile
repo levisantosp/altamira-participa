@@ -1,37 +1,32 @@
 dev:
-	go run ./api
+	cd api && $(MAKE) dev
 
 fmt:
-	find . -path './pg' -prune -o -type f -name '*.go' -exec go tool gofumpt -w {} +
-	find . -path './pg' -prune -o -type f -name '*.go' -exec go tool golines -m 80 -w {} +
-	find . -path './pg' -prune -o -type f -name '*.go' -exec go tool goimports -w {} +
+	cd api && $(MAKE) fmt
 
 lint:
-	cd api && golangci-lint $(filter-out $@,$(MAKECMDGOALS))
+	cd api && $(MAKE) lint $(filter-out $@,$(MAKECMDGOALS))
 
 lintf:
-	cd api && golangci-lint run --fix
+	cd api && $(MAKE) lintf
 
 create-schema:
-ifndef name
-	$(error name is required. Usage: make create-schema name=SchemaName)
-endif
-	cd api && go tool ent new $(name)
+	cd api && $(MAKE) create-schema
 
 generate:
-	go generate ./api/ent/...
+	cd api && $(MAKE) generate
 
 generate-clean:
-	rm -rf api/ent/generated && go generate ./api/ent/...
+	cd api && $(MAKE) generate-clean
 
 build:
-	rm -rf bin && go build -o bin/api ./api
+	cd api && $(MAKE) build
 
 start:
-	bin/api
+	cd api && $(MAKE) start
 
 push:
-	go run ./api/cmd/push
+	cd api && $(MAKE) push
 
 test:
-	go test -p 1 ./api/routes/...
+	cd api && $(MAKE) test
