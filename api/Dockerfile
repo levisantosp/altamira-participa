@@ -17,6 +17,6 @@ FROM alpine:latest
 
 WORKDIR /app
 
-COPY --from=build /app/bin/api ./bin/api
+COPY --from=build /app/api/bin/api ./bin/api
 
 ENTRYPOINT [ "./bin/api" ]
