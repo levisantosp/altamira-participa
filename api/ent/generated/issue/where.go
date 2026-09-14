@@ -65,6 +65,11 @@ func Description(v string) predicate.Issue {
 	return predicate.Issue(sql.FieldEQ(FieldDescription, v))
 }
 
+// Upvotes applies equality check predicate on the "upvotes" field. It's identical to UpvotesEQ.
+func Upvotes(v int64) predicate.Issue {
+	return predicate.Issue(sql.FieldEQ(FieldUpvotes, v))
+}
+
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.Issue {
 	return predicate.Issue(sql.FieldEQ(FieldCreatedAt, v))
@@ -225,6 +230,46 @@ func StatusNotIn(vs ...Status) predicate.Issue {
 	return predicate.Issue(sql.FieldNotIn(FieldStatus, vs...))
 }
 
+// UpvotesEQ applies the EQ predicate on the "upvotes" field.
+func UpvotesEQ(v int64) predicate.Issue {
+	return predicate.Issue(sql.FieldEQ(FieldUpvotes, v))
+}
+
+// UpvotesNEQ applies the NEQ predicate on the "upvotes" field.
+func UpvotesNEQ(v int64) predicate.Issue {
+	return predicate.Issue(sql.FieldNEQ(FieldUpvotes, v))
+}
+
+// UpvotesIn applies the In predicate on the "upvotes" field.
+func UpvotesIn(vs ...int64) predicate.Issue {
+	return predicate.Issue(sql.FieldIn(FieldUpvotes, vs...))
+}
+
+// UpvotesNotIn applies the NotIn predicate on the "upvotes" field.
+func UpvotesNotIn(vs ...int64) predicate.Issue {
+	return predicate.Issue(sql.FieldNotIn(FieldUpvotes, vs...))
+}
+
+// UpvotesGT applies the GT predicate on the "upvotes" field.
+func UpvotesGT(v int64) predicate.Issue {
+	return predicate.Issue(sql.FieldGT(FieldUpvotes, v))
+}
+
+// UpvotesGTE applies the GTE predicate on the "upvotes" field.
+func UpvotesGTE(v int64) predicate.Issue {
+	return predicate.Issue(sql.FieldGTE(FieldUpvotes, v))
+}
+
+// UpvotesLT applies the LT predicate on the "upvotes" field.
+func UpvotesLT(v int64) predicate.Issue {
+	return predicate.Issue(sql.FieldLT(FieldUpvotes, v))
+}
+
+// UpvotesLTE applies the LTE predicate on the "upvotes" field.
+func UpvotesLTE(v int64) predicate.Issue {
+	return predicate.Issue(sql.FieldLTE(FieldUpvotes, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Issue {
 	return predicate.Issue(sql.FieldEQ(FieldCreatedAt, v))
@@ -320,6 +365,29 @@ func HasUser() predicate.Issue {
 func HasUserWith(preds ...predicate.User) predicate.Issue {
 	return predicate.Issue(func(s *sql.Selector) {
 		step := newUserStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasIssueUpvotes applies the HasEdge predicate on the "issue_upvotes" edge.
+func HasIssueUpvotes() predicate.Issue {
+	return predicate.Issue(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, IssueUpvotesTable, IssueUpvotesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasIssueUpvotesWith applies the HasEdge predicate on the "issue_upvotes" edge with a given conditions (other predicates).
+func HasIssueUpvotesWith(preds ...predicate.Upvote) predicate.Issue {
+	return predicate.Issue(func(s *sql.Selector) {
+		step := newIssueUpvotesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

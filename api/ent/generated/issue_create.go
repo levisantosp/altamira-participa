@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/issue"
+	"github.com/levisantosp/altamira-participa/api/ent/generated/upvote"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/user"
 )
 
@@ -43,6 +44,20 @@ func (_c *IssueCreate) SetStatus(v issue.Status) *IssueCreate {
 func (_c *IssueCreate) SetNillableStatus(v *issue.Status) *IssueCreate {
 	if v != nil {
 		_c.SetStatus(*v)
+	}
+	return _c
+}
+
+// SetUpvotes sets the "upvotes" field.
+func (_c *IssueCreate) SetUpvotes(v int64) *IssueCreate {
+	_c.mutation.SetUpvotes(v)
+	return _c
+}
+
+// SetNillableUpvotes sets the "upvotes" field if the given value is not nil.
+func (_c *IssueCreate) SetNillableUpvotes(v *int64) *IssueCreate {
+	if v != nil {
+		_c.SetUpvotes(*v)
 	}
 	return _c
 }
@@ -92,6 +107,21 @@ func (_c *IssueCreate) SetUser(v *User) *IssueCreate {
 	return _c.SetUserID(v.ID)
 }
 
+// AddIssueUpvoteIDs adds the "issue_upvotes" edge to the Upvote entity by IDs.
+func (_c *IssueCreate) AddIssueUpvoteIDs(ids ...int64) *IssueCreate {
+	_c.mutation.AddIssueUpvoteIDs(ids...)
+	return _c
+}
+
+// AddIssueUpvotes adds the "issue_upvotes" edges to the Upvote entity.
+func (_c *IssueCreate) AddIssueUpvotes(v ...*Upvote) *IssueCreate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddIssueUpvoteIDs(ids...)
+}
+
 // Mutation returns the IssueMutation object of the builder.
 func (_c *IssueCreate) Mutation() *IssueMutation {
 	return _c.mutation
@@ -131,6 +161,10 @@ func (_c *IssueCreate) defaults() {
 		v := issue.DefaultStatus
 		_c.mutation.SetStatus(v)
 	}
+	if _, ok := _c.mutation.Upvotes(); !ok {
+		v := issue.DefaultUpvotes
+		_c.mutation.SetUpvotes(v)
+	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := issue.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
@@ -166,6 +200,9 @@ func (_c *IssueCreate) check() error {
 		if err := issue.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`generated: validator failed for field "Issue.status": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.Upvotes(); !ok {
+		return &ValidationError{Name: "upvotes", err: errors.New(`generated: missing required field "Issue.upvotes"`)}
 	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`generated: missing required field "Issue.created_at"`)}
@@ -220,6 +257,10 @@ func (_c *IssueCreate) createSpec() (*Issue, *sqlgraph.CreateSpec) {
 		_spec.SetField(issue.FieldStatus, field.TypeEnum, value)
 		_node.Status = value
 	}
+	if value, ok := _c.mutation.Upvotes(); ok {
+		_spec.SetField(issue.FieldUpvotes, field.TypeInt64, value)
+		_node.Upvotes = value
+	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(issue.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
@@ -243,6 +284,22 @@ func (_c *IssueCreate) createSpec() (*Issue, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.user_issues = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.IssueUpvotesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   issue.IssueUpvotesTable,
+			Columns: []string{issue.IssueUpvotesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(upvote.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

@@ -7,6 +7,7 @@ import (
 
 	"github.com/levisantosp/altamira-participa/api/ent/generated/account"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/issue"
+	"github.com/levisantosp/altamira-participa/api/ent/generated/upvote"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/user"
 	"github.com/levisantosp/altamira-participa/api/ent/schema"
 )
@@ -37,16 +38,32 @@ func init() {
 	issueDescDescription := issueFields[2].Descriptor()
 	// issue.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
 	issue.DescriptionValidator = issueDescDescription.Validators[0].(func(string) error)
+	// issueDescUpvotes is the schema descriptor for upvotes field.
+	issueDescUpvotes := issueFields[4].Descriptor()
+	// issue.DefaultUpvotes holds the default value on creation for the upvotes field.
+	issue.DefaultUpvotes = issueDescUpvotes.Default.(int64)
 	// issueDescCreatedAt is the schema descriptor for created_at field.
-	issueDescCreatedAt := issueFields[4].Descriptor()
+	issueDescCreatedAt := issueFields[5].Descriptor()
 	// issue.DefaultCreatedAt holds the default value on creation for the created_at field.
 	issue.DefaultCreatedAt = issueDescCreatedAt.Default.(func() time.Time)
 	// issueDescUpdatedAt is the schema descriptor for updated_at field.
-	issueDescUpdatedAt := issueFields[5].Descriptor()
+	issueDescUpdatedAt := issueFields[6].Descriptor()
 	// issue.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	issue.DefaultUpdatedAt = issueDescUpdatedAt.Default.(func() time.Time)
 	// issue.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	issue.UpdateDefaultUpdatedAt = issueDescUpdatedAt.UpdateDefault.(func() time.Time)
+	upvoteFields := schema.Upvote{}.Fields()
+	_ = upvoteFields
+	// upvoteDescCreatedAt is the schema descriptor for created_at field.
+	upvoteDescCreatedAt := upvoteFields[3].Descriptor()
+	// upvote.DefaultCreatedAt holds the default value on creation for the created_at field.
+	upvote.DefaultCreatedAt = upvoteDescCreatedAt.Default.(func() time.Time)
+	// upvoteDescUpdatedAt is the schema descriptor for updated_at field.
+	upvoteDescUpdatedAt := upvoteFields[4].Descriptor()
+	// upvote.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	upvote.DefaultUpdatedAt = upvoteDescUpdatedAt.Default.(func() time.Time)
+	// upvote.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	upvote.UpdateDefaultUpdatedAt = upvoteDescUpdatedAt.UpdateDefault.(func() time.Time)
 	userHooks := schema.User{}.Hooks()
 	user.Hooks[0] = userHooks[0]
 	userFields := schema.User{}.Fields()

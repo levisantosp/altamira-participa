@@ -23,6 +23,7 @@ func (Issue) Fields() []ent.Field {
 		field.Enum("status").
 			Values("open", "closed", "in_review").
 			Default("open"),
+		field.Int64("upvotes").Default(0),
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
@@ -36,5 +37,6 @@ func (Issue) Edges() []ent.Edge {
 			Unique().
 			Required().
 			Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.From("issue_upvotes", Upvote.Type).Ref("issue"),
 	}
 }

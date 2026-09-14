@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/account"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/issue"
+	"github.com/levisantosp/altamira-participa/api/ent/generated/upvote"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/user"
 )
 
@@ -29,6 +30,8 @@ type Client struct {
 	Account *AccountClient
 	// Issue is the client for interacting with the Issue builders.
 	Issue *IssueClient
+	// Upvote is the client for interacting with the Upvote builders.
+	Upvote *UpvoteClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -44,6 +47,7 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Account = NewAccountClient(c.config)
 	c.Issue = NewIssueClient(c.config)
+	c.Upvote = NewUpvoteClient(c.config)
 	c.User = NewUserClient(c.config)
 }
 
@@ -139,6 +143,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		config:  cfg,
 		Account: NewAccountClient(cfg),
 		Issue:   NewIssueClient(cfg),
+		Upvote:  NewUpvoteClient(cfg),
 		User:    NewUserClient(cfg),
 	}, nil
 }
@@ -161,6 +166,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		config:  cfg,
 		Account: NewAccountClient(cfg),
 		Issue:   NewIssueClient(cfg),
+		Upvote:  NewUpvoteClient(cfg),
 		User:    NewUserClient(cfg),
 	}, nil
 }
@@ -192,6 +198,7 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	c.Account.Use(hooks...)
 	c.Issue.Use(hooks...)
+	c.Upvote.Use(hooks...)
 	c.User.Use(hooks...)
 }
 
@@ -200,6 +207,7 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	c.Account.Intercept(interceptors...)
 	c.Issue.Intercept(interceptors...)
+	c.Upvote.Intercept(interceptors...)
 	c.User.Intercept(interceptors...)
 }
 
@@ -210,6 +218,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Account.mutate(ctx, m)
 	case *IssueMutation:
 		return c.Issue.mutate(ctx, m)
+	case *UpvoteMutation:
+		return c.Upvote.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
 	default:
@@ -490,6 +500,22 @@ func (c *IssueClient) QueryUser(_m *Issue) *UserQuery {
 	return query
 }
 
+// QueryIssueUpvotes queries the issue_upvotes edge of a Issue.
+func (c *IssueClient) QueryIssueUpvotes(_m *Issue) *UpvoteQuery {
+	query := (&UpvoteClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(issue.Table, issue.FieldID, id),
+			sqlgraph.To(upvote.Table, upvote.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, issue.IssueUpvotesTable, issue.IssueUpvotesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *IssueClient) Hooks() []Hook {
 	return c.hooks.Issue
@@ -512,6 +538,155 @@ func (c *IssueClient) mutate(ctx context.Context, m *IssueMutation) (Value, erro
 		return (&IssueDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("generated: unknown Issue mutation op: %q", m.Op())
+	}
+}
+
+// UpvoteClient is a client for the Upvote schema.
+type UpvoteClient struct {
+	config
+}
+
+// NewUpvoteClient returns a client for the Upvote from the given config.
+func NewUpvoteClient(c config) *UpvoteClient {
+	return &UpvoteClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `upvote.Hooks(f(g(h())))`.
+func (c *UpvoteClient) Use(hooks ...Hook) {
+	c.hooks.Upvote = append(c.hooks.Upvote, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `upvote.Intercept(f(g(h())))`.
+func (c *UpvoteClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Upvote = append(c.inters.Upvote, interceptors...)
+}
+
+// Create returns a builder for creating a Upvote entity.
+func (c *UpvoteClient) Create() *UpvoteCreate {
+	mutation := newUpvoteMutation(c.config, OpCreate)
+	return &UpvoteCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Upvote entities.
+func (c *UpvoteClient) CreateBulk(builders ...*UpvoteCreate) *UpvoteCreateBulk {
+	return &UpvoteCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *UpvoteClient) MapCreateBulk(slice any, setFunc func(*UpvoteCreate, int)) *UpvoteCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &UpvoteCreateBulk{err: fmt.Errorf("calling to UpvoteClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*UpvoteCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &UpvoteCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Upvote.
+func (c *UpvoteClient) Update() *UpvoteUpdate {
+	mutation := newUpvoteMutation(c.config, OpUpdate)
+	return &UpvoteUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *UpvoteClient) UpdateOne(_m *Upvote) *UpvoteUpdateOne {
+	mutation := newUpvoteMutation(c.config, OpUpdateOne, withUpvote(_m))
+	return &UpvoteUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *UpvoteClient) UpdateOneID(id int64) *UpvoteUpdateOne {
+	mutation := newUpvoteMutation(c.config, OpUpdateOne, withUpvoteID(id))
+	return &UpvoteUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Upvote.
+func (c *UpvoteClient) Delete() *UpvoteDelete {
+	mutation := newUpvoteMutation(c.config, OpDelete)
+	return &UpvoteDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *UpvoteClient) DeleteOne(_m *Upvote) *UpvoteDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *UpvoteClient) DeleteOneID(id int64) *UpvoteDeleteOne {
+	builder := c.Delete().Where(upvote.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &UpvoteDeleteOne{builder}
+}
+
+// Query returns a query builder for Upvote.
+func (c *UpvoteClient) Query() *UpvoteQuery {
+	return &UpvoteQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeUpvote},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Upvote entity by its id.
+func (c *UpvoteClient) Get(ctx context.Context, id int64) (*Upvote, error) {
+	return c.Query().Where(upvote.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *UpvoteClient) GetX(ctx context.Context, id int64) *Upvote {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryIssue queries the issue edge of a Upvote.
+func (c *UpvoteClient) QueryIssue(_m *Upvote) *IssueQuery {
+	query := (&IssueClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(upvote.Table, upvote.FieldID, id),
+			sqlgraph.To(issue.Table, issue.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, upvote.IssueTable, upvote.IssueColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *UpvoteClient) Hooks() []Hook {
+	return c.hooks.Upvote
+}
+
+// Interceptors returns the client interceptors.
+func (c *UpvoteClient) Interceptors() []Interceptor {
+	return c.inters.Upvote
+}
+
+func (c *UpvoteClient) mutate(ctx context.Context, m *UpvoteMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&UpvoteCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&UpvoteUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&UpvoteUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&UpvoteDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("generated: unknown Upvote mutation op: %q", m.Op())
 	}
 }
 
@@ -684,9 +859,9 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Account, Issue, User []ent.Hook
+		Account, Issue, Upvote, User []ent.Hook
 	}
 	inters struct {
-		Account, Issue, User []ent.Interceptor
+		Account, Issue, Upvote, User []ent.Interceptor
 	}
 )

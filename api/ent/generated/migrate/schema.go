@@ -37,6 +37,7 @@ var (
 		{Name: "title", Type: field.TypeString, Size: 72},
 		{Name: "description", Type: field.TypeString, Size: 65000},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"open", "closed", "in_review"}, Default: "open"},
+		{Name: "upvotes", Type: field.TypeInt64, Default: 0},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "user_issues", Type: field.TypeInt64},
@@ -49,9 +50,38 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "issues_users_issues",
-				Columns:    []*schema.Column{IssuesColumns[6]},
+				Columns:    []*schema.Column{IssuesColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// UpvotesColumns holds the columns for the "upvotes" table.
+	UpvotesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "user_id", Type: field.TypeInt64},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "issue_id", Type: field.TypeInt64},
+	}
+	// UpvotesTable holds the schema information for the "upvotes" table.
+	UpvotesTable = &schema.Table{
+		Name:       "upvotes",
+		Columns:    UpvotesColumns,
+		PrimaryKey: []*schema.Column{UpvotesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "upvotes_issues_issue",
+				Columns:    []*schema.Column{UpvotesColumns[4]},
+				RefColumns: []*schema.Column{IssuesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "upvote_user_id_issue_id",
+				Unique:  true,
+				Columns: []*schema.Column{UpvotesColumns[1], UpvotesColumns[4]},
 			},
 		},
 	}
@@ -75,6 +105,7 @@ var (
 	Tables = []*schema.Table{
 		AccountsTable,
 		IssuesTable,
+		UpvotesTable,
 		UsersTable,
 	}
 )
@@ -82,4 +113,5 @@ var (
 func init() {
 	AccountsTable.ForeignKeys[0].RefTable = UsersTable
 	IssuesTable.ForeignKeys[0].RefTable = UsersTable
+	UpvotesTable.ForeignKeys[0].RefTable = IssuesTable
 }

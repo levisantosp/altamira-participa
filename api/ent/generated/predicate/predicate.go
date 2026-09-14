@@ -12,5 +12,8 @@ type Account func(*sql.Selector)
 // Issue is the predicate function for issue builders.
 type Issue func(*sql.Selector)
 
+// Upvote is the predicate function for upvote builders.
+type Upvote func(*sql.Selector)
+
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/issue"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/predicate"
+	"github.com/levisantosp/altamira-participa/api/ent/generated/upvote"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/user"
 )
 
@@ -71,6 +72,27 @@ func (_u *IssueUpdate) SetNillableStatus(v *issue.Status) *IssueUpdate {
 	return _u
 }
 
+// SetUpvotes sets the "upvotes" field.
+func (_u *IssueUpdate) SetUpvotes(v int64) *IssueUpdate {
+	_u.mutation.ResetUpvotes()
+	_u.mutation.SetUpvotes(v)
+	return _u
+}
+
+// SetNillableUpvotes sets the "upvotes" field if the given value is not nil.
+func (_u *IssueUpdate) SetNillableUpvotes(v *int64) *IssueUpdate {
+	if v != nil {
+		_u.SetUpvotes(*v)
+	}
+	return _u
+}
+
+// AddUpvotes adds value to the "upvotes" field.
+func (_u *IssueUpdate) AddUpvotes(v int64) *IssueUpdate {
+	_u.mutation.AddUpvotes(v)
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *IssueUpdate) SetUpdatedAt(v time.Time) *IssueUpdate {
 	_u.mutation.SetUpdatedAt(v)
@@ -88,6 +110,21 @@ func (_u *IssueUpdate) SetUser(v *User) *IssueUpdate {
 	return _u.SetUserID(v.ID)
 }
 
+// AddIssueUpvoteIDs adds the "issue_upvotes" edge to the Upvote entity by IDs.
+func (_u *IssueUpdate) AddIssueUpvoteIDs(ids ...int64) *IssueUpdate {
+	_u.mutation.AddIssueUpvoteIDs(ids...)
+	return _u
+}
+
+// AddIssueUpvotes adds the "issue_upvotes" edges to the Upvote entity.
+func (_u *IssueUpdate) AddIssueUpvotes(v ...*Upvote) *IssueUpdate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddIssueUpvoteIDs(ids...)
+}
+
 // Mutation returns the IssueMutation object of the builder.
 func (_u *IssueUpdate) Mutation() *IssueMutation {
 	return _u.mutation
@@ -97,6 +134,27 @@ func (_u *IssueUpdate) Mutation() *IssueMutation {
 func (_u *IssueUpdate) ClearUser() *IssueUpdate {
 	_u.mutation.ClearUser()
 	return _u
+}
+
+// ClearIssueUpvotes clears all "issue_upvotes" edges to the Upvote entity.
+func (_u *IssueUpdate) ClearIssueUpvotes() *IssueUpdate {
+	_u.mutation.ClearIssueUpvotes()
+	return _u
+}
+
+// RemoveIssueUpvoteIDs removes the "issue_upvotes" edge to Upvote entities by IDs.
+func (_u *IssueUpdate) RemoveIssueUpvoteIDs(ids ...int64) *IssueUpdate {
+	_u.mutation.RemoveIssueUpvoteIDs(ids...)
+	return _u
+}
+
+// RemoveIssueUpvotes removes "issue_upvotes" edges to Upvote entities.
+func (_u *IssueUpdate) RemoveIssueUpvotes(v ...*Upvote) *IssueUpdate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveIssueUpvoteIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -179,6 +237,12 @@ func (_u *IssueUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(issue.FieldStatus, field.TypeEnum, value)
 	}
+	if value, ok := _u.mutation.Upvotes(); ok {
+		_spec.SetField(issue.FieldUpvotes, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedUpvotes(); ok {
+		_spec.AddField(issue.FieldUpvotes, field.TypeInt64, value)
+	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(issue.FieldUpdatedAt, field.TypeTime, value)
 	}
@@ -204,6 +268,51 @@ func (_u *IssueUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.IssueUpvotesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   issue.IssueUpvotesTable,
+			Columns: []string{issue.IssueUpvotesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(upvote.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedIssueUpvotesIDs(); len(nodes) > 0 && !_u.mutation.IssueUpvotesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   issue.IssueUpvotesTable,
+			Columns: []string{issue.IssueUpvotesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(upvote.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.IssueUpvotesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   issue.IssueUpvotesTable,
+			Columns: []string{issue.IssueUpvotesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(upvote.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -273,6 +382,27 @@ func (_u *IssueUpdateOne) SetNillableStatus(v *issue.Status) *IssueUpdateOne {
 	return _u
 }
 
+// SetUpvotes sets the "upvotes" field.
+func (_u *IssueUpdateOne) SetUpvotes(v int64) *IssueUpdateOne {
+	_u.mutation.ResetUpvotes()
+	_u.mutation.SetUpvotes(v)
+	return _u
+}
+
+// SetNillableUpvotes sets the "upvotes" field if the given value is not nil.
+func (_u *IssueUpdateOne) SetNillableUpvotes(v *int64) *IssueUpdateOne {
+	if v != nil {
+		_u.SetUpvotes(*v)
+	}
+	return _u
+}
+
+// AddUpvotes adds value to the "upvotes" field.
+func (_u *IssueUpdateOne) AddUpvotes(v int64) *IssueUpdateOne {
+	_u.mutation.AddUpvotes(v)
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *IssueUpdateOne) SetUpdatedAt(v time.Time) *IssueUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
@@ -290,6 +420,21 @@ func (_u *IssueUpdateOne) SetUser(v *User) *IssueUpdateOne {
 	return _u.SetUserID(v.ID)
 }
 
+// AddIssueUpvoteIDs adds the "issue_upvotes" edge to the Upvote entity by IDs.
+func (_u *IssueUpdateOne) AddIssueUpvoteIDs(ids ...int64) *IssueUpdateOne {
+	_u.mutation.AddIssueUpvoteIDs(ids...)
+	return _u
+}
+
+// AddIssueUpvotes adds the "issue_upvotes" edges to the Upvote entity.
+func (_u *IssueUpdateOne) AddIssueUpvotes(v ...*Upvote) *IssueUpdateOne {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddIssueUpvoteIDs(ids...)
+}
+
 // Mutation returns the IssueMutation object of the builder.
 func (_u *IssueUpdateOne) Mutation() *IssueMutation {
 	return _u.mutation
@@ -299,6 +444,27 @@ func (_u *IssueUpdateOne) Mutation() *IssueMutation {
 func (_u *IssueUpdateOne) ClearUser() *IssueUpdateOne {
 	_u.mutation.ClearUser()
 	return _u
+}
+
+// ClearIssueUpvotes clears all "issue_upvotes" edges to the Upvote entity.
+func (_u *IssueUpdateOne) ClearIssueUpvotes() *IssueUpdateOne {
+	_u.mutation.ClearIssueUpvotes()
+	return _u
+}
+
+// RemoveIssueUpvoteIDs removes the "issue_upvotes" edge to Upvote entities by IDs.
+func (_u *IssueUpdateOne) RemoveIssueUpvoteIDs(ids ...int64) *IssueUpdateOne {
+	_u.mutation.RemoveIssueUpvoteIDs(ids...)
+	return _u
+}
+
+// RemoveIssueUpvotes removes "issue_upvotes" edges to Upvote entities.
+func (_u *IssueUpdateOne) RemoveIssueUpvotes(v ...*Upvote) *IssueUpdateOne {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveIssueUpvoteIDs(ids...)
 }
 
 // Where appends a list predicates to the IssueUpdate builder.
@@ -411,6 +577,12 @@ func (_u *IssueUpdateOne) sqlSave(ctx context.Context) (_node *Issue, err error)
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(issue.FieldStatus, field.TypeEnum, value)
 	}
+	if value, ok := _u.mutation.Upvotes(); ok {
+		_spec.SetField(issue.FieldUpvotes, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedUpvotes(); ok {
+		_spec.AddField(issue.FieldUpvotes, field.TypeInt64, value)
+	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(issue.FieldUpdatedAt, field.TypeTime, value)
 	}
@@ -436,6 +608,51 @@ func (_u *IssueUpdateOne) sqlSave(ctx context.Context) (_node *Issue, err error)
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.IssueUpvotesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   issue.IssueUpvotesTable,
+			Columns: []string{issue.IssueUpvotesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(upvote.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedIssueUpvotesIDs(); len(nodes) > 0 && !_u.mutation.IssueUpvotesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   issue.IssueUpvotesTable,
+			Columns: []string{issue.IssueUpvotesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(upvote.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.IssueUpvotesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   issue.IssueUpvotesTable,
+			Columns: []string{issue.IssueUpvotesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(upvote.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {

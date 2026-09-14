@@ -33,6 +33,18 @@ func (f IssueFunc) Mutate(ctx context.Context, m generated.Mutation) (generated.
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *generated.IssueMutation", m)
 }
 
+// The UpvoteFunc type is an adapter to allow the use of ordinary
+// function as Upvote mutator.
+type UpvoteFunc func(context.Context, *generated.UpvoteMutation) (generated.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f UpvoteFunc) Mutate(ctx context.Context, m generated.Mutation) (generated.Value, error) {
+	if mv, ok := m.(*generated.UpvoteMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *generated.UpvoteMutation", m)
+}
+
 // The UserFunc type is an adapter to allow the use of ordinary
 // function as User mutator.
 type UserFunc func(context.Context, *generated.UserMutation) (generated.Value, error)

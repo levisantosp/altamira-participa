@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/account"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/issue"
+	"github.com/levisantosp/altamira-participa/api/ent/generated/upvote"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/user"
 )
 
@@ -77,6 +78,7 @@ func checkColumn(t, c string) error {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			account.Table: account.ValidColumn,
 			issue.Table:   issue.ValidColumn,
+			upvote.Table:  upvote.ValidColumn,
 			user.Table:    user.ValidColumn,
 		})
 	})

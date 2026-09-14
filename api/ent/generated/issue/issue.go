@@ -21,12 +21,16 @@ const (
 	FieldDescription = "description"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
+	// FieldUpvotes holds the string denoting the upvotes field in the database.
+	FieldUpvotes = "upvotes"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
+	// EdgeIssueUpvotes holds the string denoting the issue_upvotes edge name in mutations.
+	EdgeIssueUpvotes = "issue_upvotes"
 	// Table holds the table name of the issue in the database.
 	Table = "issues"
 	// UserTable is the table that holds the user relation/edge.
@@ -36,6 +40,13 @@ const (
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "user_issues"
+	// IssueUpvotesTable is the table that holds the issue_upvotes relation/edge.
+	IssueUpvotesTable = "upvotes"
+	// IssueUpvotesInverseTable is the table name for the Upvote entity.
+	// It exists in this package in order to avoid circular dependency with the "upvote" package.
+	IssueUpvotesInverseTable = "upvotes"
+	// IssueUpvotesColumn is the table column denoting the issue_upvotes relation/edge.
+	IssueUpvotesColumn = "issue_id"
 )
 
 // Columns holds all SQL columns for issue fields.
@@ -44,6 +55,7 @@ var Columns = []string{
 	FieldTitle,
 	FieldDescription,
 	FieldStatus,
+	FieldUpvotes,
 	FieldCreatedAt,
 	FieldUpdatedAt,
 }
@@ -74,6 +86,8 @@ var (
 	TitleValidator func(string) error
 	// DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
 	DescriptionValidator func(string) error
+	// DefaultUpvotes holds the default value on creation for the "upvotes" field.
+	DefaultUpvotes int64
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
@@ -132,6 +146,11 @@ func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatus, opts...).ToFunc()
 }
 
+// ByUpvotes orders the results by the upvotes field.
+func ByUpvotes(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpvotes, opts...).ToFunc()
+}
+
 // ByCreatedAt orders the results by the created_at field.
 func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
@@ -149,10 +168,32 @@ func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
 	}
 }
 
+// ByIssueUpvotesCount orders the results by issue_upvotes count.
+func ByIssueUpvotesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newIssueUpvotesStep(), opts...)
+	}
+}
+
+// ByIssueUpvotes orders the results by issue_upvotes terms.
+func ByIssueUpvotes(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newIssueUpvotesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 func newUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(UserInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
+	)
+}
+
+func newIssueUpvotesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(IssueUpvotesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, IssueUpvotesTable, IssueUpvotesColumn),
 	)
 }

@@ -4,7 +4,6 @@ package generated
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -15,58 +14,55 @@ import (
 	"github.com/levisantosp/altamira-participa/api/ent/generated/issue"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/predicate"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/upvote"
-	"github.com/levisantosp/altamira-participa/api/ent/generated/user"
 )
 
-// IssueQuery is the builder for querying Issue entities.
-type IssueQuery struct {
+// UpvoteQuery is the builder for querying Upvote entities.
+type UpvoteQuery struct {
 	config
-	ctx              *QueryContext
-	order            []issue.OrderOption
-	inters           []Interceptor
-	predicates       []predicate.Issue
-	withUser         *UserQuery
-	withIssueUpvotes *UpvoteQuery
-	withFKs          bool
+	ctx        *QueryContext
+	order      []upvote.OrderOption
+	inters     []Interceptor
+	predicates []predicate.Upvote
+	withIssue  *IssueQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the IssueQuery builder.
-func (_q *IssueQuery) Where(ps ...predicate.Issue) *IssueQuery {
+// Where adds a new predicate for the UpvoteQuery builder.
+func (_q *UpvoteQuery) Where(ps ...predicate.Upvote) *UpvoteQuery {
 	_q.predicates = append(_q.predicates, ps...)
 	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *IssueQuery) Limit(limit int) *IssueQuery {
+func (_q *UpvoteQuery) Limit(limit int) *UpvoteQuery {
 	_q.ctx.Limit = &limit
 	return _q
 }
 
 // Offset to start from.
-func (_q *IssueQuery) Offset(offset int) *IssueQuery {
+func (_q *UpvoteQuery) Offset(offset int) *UpvoteQuery {
 	_q.ctx.Offset = &offset
 	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *IssueQuery) Unique(unique bool) *IssueQuery {
+func (_q *UpvoteQuery) Unique(unique bool) *UpvoteQuery {
 	_q.ctx.Unique = &unique
 	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (_q *IssueQuery) Order(o ...issue.OrderOption) *IssueQuery {
+func (_q *UpvoteQuery) Order(o ...upvote.OrderOption) *UpvoteQuery {
 	_q.order = append(_q.order, o...)
 	return _q
 }
 
-// QueryUser chains the current query on the "user" edge.
-func (_q *IssueQuery) QueryUser() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+// QueryIssue chains the current query on the "issue" edge.
+func (_q *UpvoteQuery) QueryIssue() *IssueQuery {
+	query := (&IssueClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -76,9 +72,9 @@ func (_q *IssueQuery) QueryUser() *UserQuery {
 			return nil, err
 		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(issue.Table, issue.FieldID, selector),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, issue.UserTable, issue.UserColumn),
+			sqlgraph.From(upvote.Table, upvote.FieldID, selector),
+			sqlgraph.To(issue.Table, issue.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, upvote.IssueTable, upvote.IssueColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -86,43 +82,21 @@ func (_q *IssueQuery) QueryUser() *UserQuery {
 	return query
 }
 
-// QueryIssueUpvotes chains the current query on the "issue_upvotes" edge.
-func (_q *IssueQuery) QueryIssueUpvotes() *UpvoteQuery {
-	query := (&UpvoteClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(issue.Table, issue.FieldID, selector),
-			sqlgraph.To(upvote.Table, upvote.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, issue.IssueUpvotesTable, issue.IssueUpvotesColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// First returns the first Issue entity from the query.
-// Returns a *NotFoundError when no Issue was found.
-func (_q *IssueQuery) First(ctx context.Context) (*Issue, error) {
+// First returns the first Upvote entity from the query.
+// Returns a *NotFoundError when no Upvote was found.
+func (_q *UpvoteQuery) First(ctx context.Context) (*Upvote, error) {
 	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{issue.Label}
+		return nil, &NotFoundError{upvote.Label}
 	}
 	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (_q *IssueQuery) FirstX(ctx context.Context) *Issue {
+func (_q *UpvoteQuery) FirstX(ctx context.Context) *Upvote {
 	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -130,22 +104,22 @@ func (_q *IssueQuery) FirstX(ctx context.Context) *Issue {
 	return node
 }
 
-// FirstID returns the first Issue ID from the query.
-// Returns a *NotFoundError when no Issue ID was found.
-func (_q *IssueQuery) FirstID(ctx context.Context) (id int64, err error) {
+// FirstID returns the first Upvote ID from the query.
+// Returns a *NotFoundError when no Upvote ID was found.
+func (_q *UpvoteQuery) FirstID(ctx context.Context) (id int64, err error) {
 	var ids []int64
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{issue.Label}
+		err = &NotFoundError{upvote.Label}
 		return
 	}
 	return ids[0], nil
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *IssueQuery) FirstIDX(ctx context.Context) int64 {
+func (_q *UpvoteQuery) FirstIDX(ctx context.Context) int64 {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -153,10 +127,10 @@ func (_q *IssueQuery) FirstIDX(ctx context.Context) int64 {
 	return id
 }
 
-// Only returns a single Issue entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when more than one Issue entity is found.
-// Returns a *NotFoundError when no Issue entities are found.
-func (_q *IssueQuery) Only(ctx context.Context) (*Issue, error) {
+// Only returns a single Upvote entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when more than one Upvote entity is found.
+// Returns a *NotFoundError when no Upvote entities are found.
+func (_q *UpvoteQuery) Only(ctx context.Context) (*Upvote, error) {
 	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
@@ -165,14 +139,14 @@ func (_q *IssueQuery) Only(ctx context.Context) (*Issue, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{issue.Label}
+		return nil, &NotFoundError{upvote.Label}
 	default:
-		return nil, &NotSingularError{issue.Label}
+		return nil, &NotSingularError{upvote.Label}
 	}
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *IssueQuery) OnlyX(ctx context.Context) *Issue {
+func (_q *UpvoteQuery) OnlyX(ctx context.Context) *Upvote {
 	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
@@ -180,10 +154,10 @@ func (_q *IssueQuery) OnlyX(ctx context.Context) *Issue {
 	return node
 }
 
-// OnlyID is like Only, but returns the only Issue ID in the query.
-// Returns a *NotSingularError when more than one Issue ID is found.
+// OnlyID is like Only, but returns the only Upvote ID in the query.
+// Returns a *NotSingularError when more than one Upvote ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *IssueQuery) OnlyID(ctx context.Context) (id int64, err error) {
+func (_q *UpvoteQuery) OnlyID(ctx context.Context) (id int64, err error) {
 	var ids []int64
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
@@ -192,15 +166,15 @@ func (_q *IssueQuery) OnlyID(ctx context.Context) (id int64, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{issue.Label}
+		err = &NotFoundError{upvote.Label}
 	default:
-		err = &NotSingularError{issue.Label}
+		err = &NotSingularError{upvote.Label}
 	}
 	return
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *IssueQuery) OnlyIDX(ctx context.Context) int64 {
+func (_q *UpvoteQuery) OnlyIDX(ctx context.Context) int64 {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -208,18 +182,18 @@ func (_q *IssueQuery) OnlyIDX(ctx context.Context) int64 {
 	return id
 }
 
-// All executes the query and returns a list of Issues.
-func (_q *IssueQuery) All(ctx context.Context) ([]*Issue, error) {
+// All executes the query and returns a list of Upvotes.
+func (_q *UpvoteQuery) All(ctx context.Context) ([]*Upvote, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	qr := querierAll[[]*Issue, *IssueQuery]()
-	return withInterceptors[[]*Issue](ctx, _q, qr, _q.inters)
+	qr := querierAll[[]*Upvote, *UpvoteQuery]()
+	return withInterceptors[[]*Upvote](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *IssueQuery) AllX(ctx context.Context) []*Issue {
+func (_q *UpvoteQuery) AllX(ctx context.Context) []*Upvote {
 	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
@@ -227,20 +201,20 @@ func (_q *IssueQuery) AllX(ctx context.Context) []*Issue {
 	return nodes
 }
 
-// IDs executes the query and returns a list of Issue IDs.
-func (_q *IssueQuery) IDs(ctx context.Context) (ids []int64, err error) {
+// IDs executes the query and returns a list of Upvote IDs.
+func (_q *UpvoteQuery) IDs(ctx context.Context) (ids []int64, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
-	if err = _q.Select(issue.FieldID).Scan(ctx, &ids); err != nil {
+	if err = _q.Select(upvote.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *IssueQuery) IDsX(ctx context.Context) []int64 {
+func (_q *UpvoteQuery) IDsX(ctx context.Context) []int64 {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -249,16 +223,16 @@ func (_q *IssueQuery) IDsX(ctx context.Context) []int64 {
 }
 
 // Count returns the count of the given query.
-func (_q *IssueQuery) Count(ctx context.Context) (int, error) {
+func (_q *UpvoteQuery) Count(ctx context.Context) (int, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, _q, querierCount[*IssueQuery](), _q.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*UpvoteQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *IssueQuery) CountX(ctx context.Context) int {
+func (_q *UpvoteQuery) CountX(ctx context.Context) int {
 	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
@@ -267,7 +241,7 @@ func (_q *IssueQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (_q *IssueQuery) Exist(ctx context.Context) (bool, error) {
+func (_q *UpvoteQuery) Exist(ctx context.Context) (bool, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
 	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
@@ -280,7 +254,7 @@ func (_q *IssueQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *IssueQuery) ExistX(ctx context.Context) bool {
+func (_q *UpvoteQuery) ExistX(ctx context.Context) bool {
 	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
@@ -288,45 +262,33 @@ func (_q *IssueQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the IssueQuery builder, including all associated steps. It can be
+// Clone returns a duplicate of the UpvoteQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (_q *IssueQuery) Clone() *IssueQuery {
+func (_q *UpvoteQuery) Clone() *UpvoteQuery {
 	if _q == nil {
 		return nil
 	}
-	return &IssueQuery{
-		config:           _q.config,
-		ctx:              _q.ctx.Clone(),
-		order:            append([]issue.OrderOption{}, _q.order...),
-		inters:           append([]Interceptor{}, _q.inters...),
-		predicates:       append([]predicate.Issue{}, _q.predicates...),
-		withUser:         _q.withUser.Clone(),
-		withIssueUpvotes: _q.withIssueUpvotes.Clone(),
+	return &UpvoteQuery{
+		config:     _q.config,
+		ctx:        _q.ctx.Clone(),
+		order:      append([]upvote.OrderOption{}, _q.order...),
+		inters:     append([]Interceptor{}, _q.inters...),
+		predicates: append([]predicate.Upvote{}, _q.predicates...),
+		withIssue:  _q.withIssue.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
 }
 
-// WithUser tells the query-builder to eager-load the nodes that are connected to
-// the "user" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *IssueQuery) WithUser(opts ...func(*UserQuery)) *IssueQuery {
-	query := (&UserClient{config: _q.config}).Query()
+// WithIssue tells the query-builder to eager-load the nodes that are connected to
+// the "issue" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UpvoteQuery) WithIssue(opts ...func(*IssueQuery)) *UpvoteQuery {
+	query := (&IssueClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withUser = query
-	return _q
-}
-
-// WithIssueUpvotes tells the query-builder to eager-load the nodes that are connected to
-// the "issue_upvotes" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *IssueQuery) WithIssueUpvotes(opts ...func(*UpvoteQuery)) *IssueQuery {
-	query := (&UpvoteClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withIssueUpvotes = query
+	_q.withIssue = query
 	return _q
 }
 
@@ -336,19 +298,19 @@ func (_q *IssueQuery) WithIssueUpvotes(opts ...func(*UpvoteQuery)) *IssueQuery {
 // Example:
 //
 //	var v []struct {
-//		Title string `json:"title,omitempty"`
+//		UserID int64 `json:"user_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.Issue.Query().
-//		GroupBy(issue.FieldTitle).
+//	client.Upvote.Query().
+//		GroupBy(upvote.FieldUserID).
 //		Aggregate(generated.Count()).
 //		Scan(ctx, &v)
-func (_q *IssueQuery) GroupBy(field string, fields ...string) *IssueGroupBy {
+func (_q *UpvoteQuery) GroupBy(field string, fields ...string) *UpvoteGroupBy {
 	_q.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &IssueGroupBy{build: _q}
+	grbuild := &UpvoteGroupBy{build: _q}
 	grbuild.flds = &_q.ctx.Fields
-	grbuild.label = issue.Label
+	grbuild.label = upvote.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
 }
@@ -359,26 +321,26 @@ func (_q *IssueQuery) GroupBy(field string, fields ...string) *IssueGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Title string `json:"title,omitempty"`
+//		UserID int64 `json:"user_id,omitempty"`
 //	}
 //
-//	client.Issue.Query().
-//		Select(issue.FieldTitle).
+//	client.Upvote.Query().
+//		Select(upvote.FieldUserID).
 //		Scan(ctx, &v)
-func (_q *IssueQuery) Select(fields ...string) *IssueSelect {
+func (_q *UpvoteQuery) Select(fields ...string) *UpvoteSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
-	sbuild := &IssueSelect{IssueQuery: _q}
-	sbuild.label = issue.Label
+	sbuild := &UpvoteSelect{UpvoteQuery: _q}
+	sbuild.label = upvote.Label
 	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
-// Aggregate returns a IssueSelect configured with the given aggregations.
-func (_q *IssueQuery) Aggregate(fns ...AggregateFunc) *IssueSelect {
+// Aggregate returns a UpvoteSelect configured with the given aggregations.
+func (_q *UpvoteQuery) Aggregate(fns ...AggregateFunc) *UpvoteSelect {
 	return _q.Select().Aggregate(fns...)
 }
 
-func (_q *IssueQuery) prepareQuery(ctx context.Context) error {
+func (_q *UpvoteQuery) prepareQuery(ctx context.Context) error {
 	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("generated: uninitialized interceptor (forgotten import generated/runtime?)")
@@ -390,7 +352,7 @@ func (_q *IssueQuery) prepareQuery(ctx context.Context) error {
 		}
 	}
 	for _, f := range _q.ctx.Fields {
-		if !issue.ValidColumn(f) {
+		if !upvote.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("generated: invalid field %q for query", f)}
 		}
 	}
@@ -404,27 +366,19 @@ func (_q *IssueQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (_q *IssueQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Issue, error) {
+func (_q *UpvoteQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Upvote, error) {
 	var (
-		nodes       = []*Issue{}
-		withFKs     = _q.withFKs
+		nodes       = []*Upvote{}
 		_spec       = _q.querySpec()
-		loadedTypes = [2]bool{
-			_q.withUser != nil,
-			_q.withIssueUpvotes != nil,
+		loadedTypes = [1]bool{
+			_q.withIssue != nil,
 		}
 	)
-	if _q.withUser != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, issue.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Issue).scanValues(nil, columns)
+		return (*Upvote).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Issue{config: _q.config}
+		node := &Upvote{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -438,30 +392,20 @@ func (_q *IssueQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Issue,
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := _q.withUser; query != nil {
-		if err := _q.loadUser(ctx, query, nodes, nil,
-			func(n *Issue, e *User) { n.Edges.User = e }); err != nil {
-			return nil, err
-		}
-	}
-	if query := _q.withIssueUpvotes; query != nil {
-		if err := _q.loadIssueUpvotes(ctx, query, nodes,
-			func(n *Issue) { n.Edges.IssueUpvotes = []*Upvote{} },
-			func(n *Issue, e *Upvote) { n.Edges.IssueUpvotes = append(n.Edges.IssueUpvotes, e) }); err != nil {
+	if query := _q.withIssue; query != nil {
+		if err := _q.loadIssue(ctx, query, nodes, nil,
+			func(n *Upvote, e *Issue) { n.Edges.Issue = e }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (_q *IssueQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Issue, init func(*Issue), assign func(*Issue, *User)) error {
+func (_q *UpvoteQuery) loadIssue(ctx context.Context, query *IssueQuery, nodes []*Upvote, init func(*Upvote), assign func(*Upvote, *Issue)) error {
 	ids := make([]int64, 0, len(nodes))
-	nodeids := make(map[int64][]*Issue)
+	nodeids := make(map[int64][]*Upvote)
 	for i := range nodes {
-		if nodes[i].user_issues == nil {
-			continue
-		}
-		fk := *nodes[i].user_issues
+		fk := nodes[i].IssueID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -470,7 +414,7 @@ func (_q *IssueQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*I
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(user.IDIn(ids...))
+	query.Where(issue.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -478,7 +422,7 @@ func (_q *IssueQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*I
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_issues" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "issue_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -487,38 +431,7 @@ func (_q *IssueQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*I
 	return nil
 }
 
-func (_q *IssueQuery) loadIssueUpvotes(ctx context.Context, query *UpvoteQuery, nodes []*Issue, init func(*Issue), assign func(*Issue, *Upvote)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int64]*Issue)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(upvote.FieldIssueID)
-	}
-	query.Where(predicate.Upvote(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(issue.IssueUpvotesColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.IssueID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "issue_id" returned %v for node %v`, fk, n.ID)
-		}
-		assign(node, n)
-	}
-	return nil
-}
-
-func (_q *IssueQuery) sqlCount(ctx context.Context) (int, error) {
+func (_q *UpvoteQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
@@ -527,8 +440,8 @@ func (_q *IssueQuery) sqlCount(ctx context.Context) (int, error) {
 	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (_q *IssueQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(issue.Table, issue.Columns, sqlgraph.NewFieldSpec(issue.FieldID, field.TypeInt64))
+func (_q *UpvoteQuery) querySpec() *sqlgraph.QuerySpec {
+	_spec := sqlgraph.NewQuerySpec(upvote.Table, upvote.Columns, sqlgraph.NewFieldSpec(upvote.FieldID, field.TypeInt64))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -537,11 +450,14 @@ func (_q *IssueQuery) querySpec() *sqlgraph.QuerySpec {
 	}
 	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, issue.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, upvote.FieldID)
 		for i := range fields {
-			if fields[i] != issue.FieldID {
+			if fields[i] != upvote.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if _q.withIssue != nil {
+			_spec.Node.AddColumnOnce(upvote.FieldIssueID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {
@@ -567,12 +483,12 @@ func (_q *IssueQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (_q *IssueQuery) sqlQuery(ctx context.Context) *sql.Selector {
+func (_q *UpvoteQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(_q.driver.Dialect())
-	t1 := builder.Table(issue.Table)
+	t1 := builder.Table(upvote.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
-		columns = issue.Columns
+		columns = upvote.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if _q.sql != nil {
@@ -599,28 +515,28 @@ func (_q *IssueQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
-// IssueGroupBy is the group-by builder for Issue entities.
-type IssueGroupBy struct {
+// UpvoteGroupBy is the group-by builder for Upvote entities.
+type UpvoteGroupBy struct {
 	selector
-	build *IssueQuery
+	build *UpvoteQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (_g *IssueGroupBy) Aggregate(fns ...AggregateFunc) *IssueGroupBy {
+func (_g *UpvoteGroupBy) Aggregate(fns ...AggregateFunc) *UpvoteGroupBy {
 	_g.fns = append(_g.fns, fns...)
 	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_g *IssueGroupBy) Scan(ctx context.Context, v any) error {
+func (_g *UpvoteGroupBy) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
 	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*IssueQuery, *IssueGroupBy](ctx, _g.build, _g, _g.build.inters, v)
+	return scanWithInterceptors[*UpvoteQuery, *UpvoteGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (_g *IssueGroupBy) sqlScan(ctx context.Context, root *IssueQuery, v any) error {
+func (_g *UpvoteGroupBy) sqlScan(ctx context.Context, root *UpvoteQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
 	aggregation := make([]string, 0, len(_g.fns))
 	for _, fn := range _g.fns {
@@ -647,28 +563,28 @@ func (_g *IssueGroupBy) sqlScan(ctx context.Context, root *IssueQuery, v any) er
 	return sql.ScanSlice(rows, v)
 }
 
-// IssueSelect is the builder for selecting fields of Issue entities.
-type IssueSelect struct {
-	*IssueQuery
+// UpvoteSelect is the builder for selecting fields of Upvote entities.
+type UpvoteSelect struct {
+	*UpvoteQuery
 	selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (_s *IssueSelect) Aggregate(fns ...AggregateFunc) *IssueSelect {
+func (_s *UpvoteSelect) Aggregate(fns ...AggregateFunc) *UpvoteSelect {
 	_s.fns = append(_s.fns, fns...)
 	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_s *IssueSelect) Scan(ctx context.Context, v any) error {
+func (_s *UpvoteSelect) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
 	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*IssueQuery, *IssueSelect](ctx, _s.IssueQuery, _s, _s.inters, v)
+	return scanWithInterceptors[*UpvoteQuery, *UpvoteSelect](ctx, _s.UpvoteQuery, _s, _s.inters, v)
 }
 
-func (_s *IssueSelect) sqlScan(ctx context.Context, root *IssueQuery, v any) error {
+func (_s *UpvoteSelect) sqlScan(ctx context.Context, root *UpvoteQuery, v any) error {
 	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(_s.fns))
 	for _, fn := range _s.fns {

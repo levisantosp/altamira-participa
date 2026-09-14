@@ -14,6 +14,7 @@ import (
 	"github.com/levisantosp/altamira-participa/api/ent/generated/account"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/issue"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/predicate"
+	"github.com/levisantosp/altamira-participa/api/ent/generated/upvote"
 	"github.com/levisantosp/altamira-participa/api/ent/generated/user"
 )
 
@@ -28,6 +29,7 @@ const (
 	// Node types.
 	TypeAccount = "Account"
 	TypeIssue   = "Issue"
+	TypeUpvote  = "Upvote"
 	TypeUser    = "User"
 )
 
@@ -617,20 +619,25 @@ func (m *AccountMutation) ResetEdge(name string) error {
 // IssueMutation represents an operation that mutates the Issue nodes in the graph.
 type IssueMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int64
-	title         *string
-	description   *string
-	status        *issue.Status
-	created_at    *time.Time
-	updated_at    *time.Time
-	clearedFields map[string]struct{}
-	user          *int64
-	cleareduser   bool
-	done          bool
-	oldValue      func(context.Context) (*Issue, error)
-	predicates    []predicate.Issue
+	op                   Op
+	typ                  string
+	id                   *int64
+	title                *string
+	description          *string
+	status               *issue.Status
+	upvotes              *int64
+	addupvotes           *int64
+	created_at           *time.Time
+	updated_at           *time.Time
+	clearedFields        map[string]struct{}
+	user                 *int64
+	cleareduser          bool
+	issue_upvotes        map[int64]struct{}
+	removedissue_upvotes map[int64]struct{}
+	clearedissue_upvotes bool
+	done                 bool
+	oldValue             func(context.Context) (*Issue, error)
+	predicates           []predicate.Issue
 }
 
 var _ ent.Mutation = (*IssueMutation)(nil)
@@ -845,6 +852,62 @@ func (m *IssueMutation) ResetStatus() {
 	m.status = nil
 }
 
+// SetUpvotes sets the "upvotes" field.
+func (m *IssueMutation) SetUpvotes(i int64) {
+	m.upvotes = &i
+	m.addupvotes = nil
+}
+
+// Upvotes returns the value of the "upvotes" field in the mutation.
+func (m *IssueMutation) Upvotes() (r int64, exists bool) {
+	v := m.upvotes
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpvotes returns the old "upvotes" field's value of the Issue entity.
+// If the Issue object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IssueMutation) OldUpvotes(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpvotes is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpvotes requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpvotes: %w", err)
+	}
+	return oldValue.Upvotes, nil
+}
+
+// AddUpvotes adds i to the "upvotes" field.
+func (m *IssueMutation) AddUpvotes(i int64) {
+	if m.addupvotes != nil {
+		*m.addupvotes += i
+	} else {
+		m.addupvotes = &i
+	}
+}
+
+// AddedUpvotes returns the value that was added to the "upvotes" field in this mutation.
+func (m *IssueMutation) AddedUpvotes() (r int64, exists bool) {
+	v := m.addupvotes
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetUpvotes resets all changes to the "upvotes" field.
+func (m *IssueMutation) ResetUpvotes() {
+	m.upvotes = nil
+	m.addupvotes = nil
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (m *IssueMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
@@ -956,6 +1019,60 @@ func (m *IssueMutation) ResetUser() {
 	m.cleareduser = false
 }
 
+// AddIssueUpvoteIDs adds the "issue_upvotes" edge to the Upvote entity by ids.
+func (m *IssueMutation) AddIssueUpvoteIDs(ids ...int64) {
+	if m.issue_upvotes == nil {
+		m.issue_upvotes = make(map[int64]struct{})
+	}
+	for i := range ids {
+		m.issue_upvotes[ids[i]] = struct{}{}
+	}
+}
+
+// ClearIssueUpvotes clears the "issue_upvotes" edge to the Upvote entity.
+func (m *IssueMutation) ClearIssueUpvotes() {
+	m.clearedissue_upvotes = true
+}
+
+// IssueUpvotesCleared reports if the "issue_upvotes" edge to the Upvote entity was cleared.
+func (m *IssueMutation) IssueUpvotesCleared() bool {
+	return m.clearedissue_upvotes
+}
+
+// RemoveIssueUpvoteIDs removes the "issue_upvotes" edge to the Upvote entity by IDs.
+func (m *IssueMutation) RemoveIssueUpvoteIDs(ids ...int64) {
+	if m.removedissue_upvotes == nil {
+		m.removedissue_upvotes = make(map[int64]struct{})
+	}
+	for i := range ids {
+		delete(m.issue_upvotes, ids[i])
+		m.removedissue_upvotes[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedIssueUpvotes returns the removed IDs of the "issue_upvotes" edge to the Upvote entity.
+func (m *IssueMutation) RemovedIssueUpvotesIDs() (ids []int64) {
+	for id := range m.removedissue_upvotes {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// IssueUpvotesIDs returns the "issue_upvotes" edge IDs in the mutation.
+func (m *IssueMutation) IssueUpvotesIDs() (ids []int64) {
+	for id := range m.issue_upvotes {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetIssueUpvotes resets all changes to the "issue_upvotes" edge.
+func (m *IssueMutation) ResetIssueUpvotes() {
+	m.issue_upvotes = nil
+	m.clearedissue_upvotes = false
+	m.removedissue_upvotes = nil
+}
+
 // Where appends a list predicates to the IssueMutation builder.
 func (m *IssueMutation) Where(ps ...predicate.Issue) {
 	m.predicates = append(m.predicates, ps...)
@@ -990,7 +1107,7 @@ func (m *IssueMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *IssueMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.title != nil {
 		fields = append(fields, issue.FieldTitle)
 	}
@@ -999,6 +1116,9 @@ func (m *IssueMutation) Fields() []string {
 	}
 	if m.status != nil {
 		fields = append(fields, issue.FieldStatus)
+	}
+	if m.upvotes != nil {
+		fields = append(fields, issue.FieldUpvotes)
 	}
 	if m.created_at != nil {
 		fields = append(fields, issue.FieldCreatedAt)
@@ -1020,6 +1140,8 @@ func (m *IssueMutation) Field(name string) (ent.Value, bool) {
 		return m.Description()
 	case issue.FieldStatus:
 		return m.Status()
+	case issue.FieldUpvotes:
+		return m.Upvotes()
 	case issue.FieldCreatedAt:
 		return m.CreatedAt()
 	case issue.FieldUpdatedAt:
@@ -1039,6 +1161,8 @@ func (m *IssueMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldDescription(ctx)
 	case issue.FieldStatus:
 		return m.OldStatus(ctx)
+	case issue.FieldUpvotes:
+		return m.OldUpvotes(ctx)
 	case issue.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	case issue.FieldUpdatedAt:
@@ -1073,6 +1197,13 @@ func (m *IssueMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetStatus(v)
 		return nil
+	case issue.FieldUpvotes:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpvotes(v)
+		return nil
 	case issue.FieldCreatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -1094,13 +1225,21 @@ func (m *IssueMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *IssueMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addupvotes != nil {
+		fields = append(fields, issue.FieldUpvotes)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *IssueMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case issue.FieldUpvotes:
+		return m.AddedUpvotes()
+	}
 	return nil, false
 }
 
@@ -1109,6 +1248,13 @@ func (m *IssueMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *IssueMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case issue.FieldUpvotes:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddUpvotes(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Issue numeric field %s", name)
 }
@@ -1145,6 +1291,9 @@ func (m *IssueMutation) ResetField(name string) error {
 	case issue.FieldStatus:
 		m.ResetStatus()
 		return nil
+	case issue.FieldUpvotes:
+		m.ResetUpvotes()
+		return nil
 	case issue.FieldCreatedAt:
 		m.ResetCreatedAt()
 		return nil
@@ -1157,9 +1306,12 @@ func (m *IssueMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *IssueMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.user != nil {
 		edges = append(edges, issue.EdgeUser)
+	}
+	if m.issue_upvotes != nil {
+		edges = append(edges, issue.EdgeIssueUpvotes)
 	}
 	return edges
 }
@@ -1172,27 +1324,47 @@ func (m *IssueMutation) AddedIDs(name string) []ent.Value {
 		if id := m.user; id != nil {
 			return []ent.Value{*id}
 		}
+	case issue.EdgeIssueUpvotes:
+		ids := make([]ent.Value, 0, len(m.issue_upvotes))
+		for id := range m.issue_upvotes {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *IssueMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
+	if m.removedissue_upvotes != nil {
+		edges = append(edges, issue.EdgeIssueUpvotes)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *IssueMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case issue.EdgeIssueUpvotes:
+		ids := make([]ent.Value, 0, len(m.removedissue_upvotes))
+		for id := range m.removedissue_upvotes {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *IssueMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.cleareduser {
 		edges = append(edges, issue.EdgeUser)
+	}
+	if m.clearedissue_upvotes {
+		edges = append(edges, issue.EdgeIssueUpvotes)
 	}
 	return edges
 }
@@ -1203,6 +1375,8 @@ func (m *IssueMutation) EdgeCleared(name string) bool {
 	switch name {
 	case issue.EdgeUser:
 		return m.cleareduser
+	case issue.EdgeIssueUpvotes:
+		return m.clearedissue_upvotes
 	}
 	return false
 }
@@ -1225,8 +1399,595 @@ func (m *IssueMutation) ResetEdge(name string) error {
 	case issue.EdgeUser:
 		m.ResetUser()
 		return nil
+	case issue.EdgeIssueUpvotes:
+		m.ResetIssueUpvotes()
+		return nil
 	}
 	return fmt.Errorf("unknown Issue edge %s", name)
+}
+
+// UpvoteMutation represents an operation that mutates the Upvote nodes in the graph.
+type UpvoteMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int64
+	user_id       *int64
+	adduser_id    *int64
+	created_at    *time.Time
+	updated_at    *time.Time
+	clearedFields map[string]struct{}
+	issue         *int64
+	clearedissue  bool
+	done          bool
+	oldValue      func(context.Context) (*Upvote, error)
+	predicates    []predicate.Upvote
+}
+
+var _ ent.Mutation = (*UpvoteMutation)(nil)
+
+// upvoteOption allows management of the mutation configuration using functional options.
+type upvoteOption func(*UpvoteMutation)
+
+// newUpvoteMutation creates new mutation for the Upvote entity.
+func newUpvoteMutation(c config, op Op, opts ...upvoteOption) *UpvoteMutation {
+	m := &UpvoteMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeUpvote,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withUpvoteID sets the ID field of the mutation.
+func withUpvoteID(id int64) upvoteOption {
+	return func(m *UpvoteMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Upvote
+		)
+		m.oldValue = func(ctx context.Context) (*Upvote, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Upvote.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withUpvote sets the old Upvote of the mutation.
+func withUpvote(node *Upvote) upvoteOption {
+	return func(m *UpvoteMutation) {
+		m.oldValue = func(context.Context) (*Upvote, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m UpvoteMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m UpvoteMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("generated: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Upvote entities.
+func (m *UpvoteMutation) SetID(id int64) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *UpvoteMutation) ID() (id int64, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *UpvoteMutation) IDs(ctx context.Context) ([]int64, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int64{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Upvote.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetUserID sets the "user_id" field.
+func (m *UpvoteMutation) SetUserID(i int64) {
+	m.user_id = &i
+	m.adduser_id = nil
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *UpvoteMutation) UserID() (r int64, exists bool) {
+	v := m.user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the Upvote entity.
+// If the Upvote object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UpvoteMutation) OldUserID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// AddUserID adds i to the "user_id" field.
+func (m *UpvoteMutation) AddUserID(i int64) {
+	if m.adduser_id != nil {
+		*m.adduser_id += i
+	} else {
+		m.adduser_id = &i
+	}
+}
+
+// AddedUserID returns the value that was added to the "user_id" field in this mutation.
+func (m *UpvoteMutation) AddedUserID() (r int64, exists bool) {
+	v := m.adduser_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *UpvoteMutation) ResetUserID() {
+	m.user_id = nil
+	m.adduser_id = nil
+}
+
+// SetIssueID sets the "issue_id" field.
+func (m *UpvoteMutation) SetIssueID(i int64) {
+	m.issue = &i
+}
+
+// IssueID returns the value of the "issue_id" field in the mutation.
+func (m *UpvoteMutation) IssueID() (r int64, exists bool) {
+	v := m.issue
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIssueID returns the old "issue_id" field's value of the Upvote entity.
+// If the Upvote object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UpvoteMutation) OldIssueID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIssueID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIssueID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIssueID: %w", err)
+	}
+	return oldValue.IssueID, nil
+}
+
+// ResetIssueID resets all changes to the "issue_id" field.
+func (m *UpvoteMutation) ResetIssueID() {
+	m.issue = nil
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *UpvoteMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *UpvoteMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the Upvote entity.
+// If the Upvote object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UpvoteMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *UpvoteMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *UpvoteMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *UpvoteMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the Upvote entity.
+// If the Upvote object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UpvoteMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *UpvoteMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// ClearIssue clears the "issue" edge to the Issue entity.
+func (m *UpvoteMutation) ClearIssue() {
+	m.clearedissue = true
+	m.clearedFields[upvote.FieldIssueID] = struct{}{}
+}
+
+// IssueCleared reports if the "issue" edge to the Issue entity was cleared.
+func (m *UpvoteMutation) IssueCleared() bool {
+	return m.clearedissue
+}
+
+// IssueIDs returns the "issue" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// IssueID instead. It exists only for internal usage by the builders.
+func (m *UpvoteMutation) IssueIDs() (ids []int64) {
+	if id := m.issue; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetIssue resets all changes to the "issue" edge.
+func (m *UpvoteMutation) ResetIssue() {
+	m.issue = nil
+	m.clearedissue = false
+}
+
+// Where appends a list predicates to the UpvoteMutation builder.
+func (m *UpvoteMutation) Where(ps ...predicate.Upvote) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the UpvoteMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *UpvoteMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Upvote, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *UpvoteMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *UpvoteMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Upvote).
+func (m *UpvoteMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *UpvoteMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m.user_id != nil {
+		fields = append(fields, upvote.FieldUserID)
+	}
+	if m.issue != nil {
+		fields = append(fields, upvote.FieldIssueID)
+	}
+	if m.created_at != nil {
+		fields = append(fields, upvote.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, upvote.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *UpvoteMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case upvote.FieldUserID:
+		return m.UserID()
+	case upvote.FieldIssueID:
+		return m.IssueID()
+	case upvote.FieldCreatedAt:
+		return m.CreatedAt()
+	case upvote.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *UpvoteMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case upvote.FieldUserID:
+		return m.OldUserID(ctx)
+	case upvote.FieldIssueID:
+		return m.OldIssueID(ctx)
+	case upvote.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case upvote.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown Upvote field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *UpvoteMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case upvote.FieldUserID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case upvote.FieldIssueID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIssueID(v)
+		return nil
+	case upvote.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case upvote.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Upvote field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *UpvoteMutation) AddedFields() []string {
+	var fields []string
+	if m.adduser_id != nil {
+		fields = append(fields, upvote.FieldUserID)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *UpvoteMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case upvote.FieldUserID:
+		return m.AddedUserID()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *UpvoteMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case upvote.FieldUserID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddUserID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Upvote numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *UpvoteMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *UpvoteMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *UpvoteMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Upvote nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *UpvoteMutation) ResetField(name string) error {
+	switch name {
+	case upvote.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case upvote.FieldIssueID:
+		m.ResetIssueID()
+		return nil
+	case upvote.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case upvote.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown Upvote field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *UpvoteMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.issue != nil {
+		edges = append(edges, upvote.EdgeIssue)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *UpvoteMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case upvote.EdgeIssue:
+		if id := m.issue; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *UpvoteMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *UpvoteMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *UpvoteMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedissue {
+		edges = append(edges, upvote.EdgeIssue)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *UpvoteMutation) EdgeCleared(name string) bool {
+	switch name {
+	case upvote.EdgeIssue:
+		return m.clearedissue
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *UpvoteMutation) ClearEdge(name string) error {
+	switch name {
+	case upvote.EdgeIssue:
+		m.ClearIssue()
+		return nil
+	}
+	return fmt.Errorf("unknown Upvote unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *UpvoteMutation) ResetEdge(name string) error {
+	switch name {
+	case upvote.EdgeIssue:
+		m.ResetIssue()
+		return nil
+	}
+	return fmt.Errorf("unknown Upvote edge %s", name)
 }
 
 // UserMutation represents an operation that mutates the User nodes in the graph.

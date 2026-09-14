@@ -24,6 +24,8 @@ type Issue struct {
 	Description string `json:"description,omitempty"`
 	// Status holds the value of the "status" field.
 	Status issue.Status `json:"status,omitempty"`
+	// Upvotes holds the value of the "upvotes" field.
+	Upvotes int64 `json:"upvotes,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -39,9 +41,11 @@ type Issue struct {
 type IssueEdges struct {
 	// User holds the value of the user edge.
 	User *User `json:"user,omitempty"`
+	// IssueUpvotes holds the value of the issue_upvotes edge.
+	IssueUpvotes []*Upvote `json:"issue_upvotes,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -55,12 +59,21 @@ func (e IssueEdges) UserOrErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "user"}
 }
 
+// IssueUpvotesOrErr returns the IssueUpvotes value or an error if the edge
+// was not loaded in eager-loading.
+func (e IssueEdges) IssueUpvotesOrErr() ([]*Upvote, error) {
+	if e.loadedTypes[1] {
+		return e.IssueUpvotes, nil
+	}
+	return nil, &NotLoadedError{edge: "issue_upvotes"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Issue) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case issue.FieldID:
+		case issue.FieldID, issue.FieldUpvotes:
 			values[i] = new(sql.NullInt64)
 		case issue.FieldTitle, issue.FieldDescription, issue.FieldStatus:
 			values[i] = new(sql.NullString)
@@ -107,6 +120,12 @@ func (_m *Issue) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Status = issue.Status(value.String)
 			}
+		case issue.FieldUpvotes:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field upvotes", values[i])
+			} else if value.Valid {
+				_m.Upvotes = value.Int64
+			}
 		case issue.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
@@ -144,6 +163,11 @@ func (_m *Issue) QueryUser() *UserQuery {
 	return NewIssueClient(_m.config).QueryUser(_m)
 }
 
+// QueryIssueUpvotes queries the "issue_upvotes" edge of the Issue entity.
+func (_m *Issue) QueryIssueUpvotes() *UpvoteQuery {
+	return NewIssueClient(_m.config).QueryIssueUpvotes(_m)
+}
+
 // Update returns a builder for updating this Issue.
 // Note that you need to call Issue.Unwrap() before calling this method if this Issue
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -175,6 +199,9 @@ func (_m *Issue) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Status))
+	builder.WriteString(", ")
+	builder.WriteString("upvotes=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Upvotes))
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
