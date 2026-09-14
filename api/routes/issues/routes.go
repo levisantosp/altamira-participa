@@ -18,4 +18,5 @@ func Routes(api huma.API) {
 		Path:          "",
 		DefaultStatus: http.StatusCreated,
 	}, CreateIssue)
+	huma.Post(group, "/{id}/upvote", UpvoteIssue)
 }
