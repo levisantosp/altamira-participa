@@ -49,7 +49,9 @@ func UpvoteIssue(
 		}
 
 		if generated.IsConstraintError(err) {
-			return nil, huma.Error409Conflict("Você só pode apoiar uma demanda uma unica vez.")
+			return nil, huma.Error409Conflict(
+				"Você só pode apoiar uma demanda uma unica vez.",
+			)
 		}
 
 		return nil, utils.LogErr(
