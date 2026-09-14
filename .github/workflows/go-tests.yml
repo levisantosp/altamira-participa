@@ -24,11 +24,11 @@ jobs:
         env:
           POSTGRES_USER: admin
           POSTGRES_PASSWORD: admin
-          POSTGRES_DB: test
+          POSTGRES_DB: admin
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U postgres -d test"
+          --health-cmd "pg_isready -U postgres -d admin"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
@@ -57,7 +57,7 @@ jobs:
 
       - name: create .env.test file
         run: |
-          cp .env.test.example .env.test
+          cp .env.example .env.test
 
       - name: run tests
         id: tests
