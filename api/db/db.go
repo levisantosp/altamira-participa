@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"database/sql"
 	"log"
 
@@ -29,4 +30,29 @@ func Connect() *sql.DB {
 	)
 
 	return db
+}
+
+func WithTx[T any](
+	ctx context.Context,
+	fn func(tx *generated.Tx) (*T, error),
+) (*T, error) {
+	tx, err := Client.Tx(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		_ = tx.Rollback()
+	}()
+
+	result, err := fn(tx)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
