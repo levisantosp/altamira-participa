@@ -59,7 +59,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@master
         with:
           commit_message: |
-            style: run go fmt e golangci-lint autofix
+            style: run go fmt and golangci-lint autofix
 
             Co-authored-by: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
           commit_user_name: github-actions[bot]
