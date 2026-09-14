@@ -48,6 +48,10 @@ func UpvoteIssue(
 			return nil, huma.Error404NotFound("Demanda não encontrada")
 		}
 
+		if generated.IsConstraintError(err) {
+			return nil, huma.Error409Conflict("Você só pode apoiar uma demanda uma unica vez.")
+		}
+
 		return nil, utils.LogErr(
 			huma.Error500InternalServerError("Internal Server Error"),
 			err,
