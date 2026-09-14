@@ -16,7 +16,7 @@ create-schema:
 ifndef name
 	$(error name is required. Usage: make create-schema name=SchemaName)
 endif
-	go tool ent new $(name)
+	cd api && go tool ent new $(name)
 
 generate:
 	go generate ./api/ent/...
