@@ -56,9 +56,19 @@ jobs:
           cache: true
 
       - name: create .env.test file
+        env:
+          CLOUDFLARE_R2_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          CLOUDFLARE_R2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+          CLOUDFLARE_R2_URL: ${{ vars.CLOUDFLARE_R2_URL }}
+          CLOUDFLARE_R2_BUCKET: ${{ vars.CLOUDFLARE_R2_BUCKET }}
         run: |
           cp .env.example .env.test
-
+          {
+            echo "CLOUDFLARE_R2_ACCESS_KEY_ID=$CLOUDFLARE_R2_ACCESS_KEY_ID"
+            echo "CLOUDFLARE_R2_SECRET_ACCESS_KEY=$CLOUDFLARE_R2_SECRET_ACCESS_KEY"
+            echo "CLOUDFLARE_R2_URL=$CLOUDFLARE_R2_URL"
+            echo "CLOUDFLARE_R2_BUCKET=$CLOUDFLARE_R2_BUCKET"
+          } >> .env.test
       - name: run tests
         id: tests
         run: make test
