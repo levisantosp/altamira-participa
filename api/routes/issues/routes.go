@@ -17,6 +17,7 @@ func Routes(api huma.API) {
 		Method:        http.MethodPost,
 		Path:          "",
 		DefaultStatus: http.StatusCreated,
+		MaxBodyBytes:  16_000_000,
 	}, CreateIssue)
 	huma.Post(group, "/{id}/upvote", UpvoteIssue)
 }

@@ -11,18 +11,22 @@ import (
 )
 
 type TEnv struct {
-	DatabaseURL    string   `zog:"DATABASE_URL"`
-	RedisAddr      string   `zog:"REDIS_ADDR"`
-	RedisPassword  string   `zog:"REDIS_PASSWORD"`
-	TrustedOrigins []string `zog:"TRUSTED_ORIGINS"`
-	DashboardURL   string   `zog:"DASHBOARD_URL"`
-	WebURL         string   `zog:"WEB_URL"`
+	DatabaseURL             string   `zog:"DATABASE_URL"`
+	RedisAddr               string   `zog:"REDIS_ADDR"`
+	RedisPassword           string   `zog:"REDIS_PASSWORD"`
+	TrustedOrigins          []string `zog:"TRUSTED_ORIGINS"`
+	DashboardURL            string   `zog:"DASHBOARD_URL"`
+	WebURL                  string   `zog:"WEB_URL"`
+	CloudflareR2AccessKeyID string   `zog:"CLOUDFLARE_R2_ACCESS_KEY_ID"`
+	CloudflareR2SecretKey   string   `zog:"CLOUDFLARE_R2_SECRET_ACCESS_KEY"`
+	CloudflareR2URL         string   `zog:"CLOUDFLARE_R2_URL"`
+	CloudflareR2Bucket      string   `zog:"CLOUDFLARE_R2_BUCKET"`
 }
 
 var Env TEnv
 
 func LoadEnv(envFile string) {
-	_ = godotenv.Overload(envFile)
+	godotenv.Overload(envFile)
 
 	schema := zog.Struct(zog.Shape{
 		"DatabaseURL":   zog.String().URL().Required(),
@@ -39,8 +43,12 @@ func LoadEnv(envFile string) {
 			},
 			zog.Slice(zog.String().URL().Required()),
 		),
-		"DashboardURL": zog.String().URL(),
-		"WebURL":       zog.String().URL(),
+		"DashboardURL":            zog.String().URL(),
+		"WebURL":                  zog.String().URL(),
+		"CloudflareR2AccessKeyID": zog.String().Required(),
+		"CloudflareR2SecretKey":   zog.String().Required(),
+		"CloudflareR2URL":         zog.String().URL().Required(),
+		"CloudflareR2Bucket":      zog.String().Required(),
 	})
 
 	err := schema.Parse(zenv.NewDataProvider(), &Env)
