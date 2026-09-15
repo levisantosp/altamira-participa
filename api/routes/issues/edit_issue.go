@@ -1,4 +1,4 @@
-package users
+package issues
 
 import (
 	"context"
@@ -18,20 +18,16 @@ type EditIssueOutput struct {
 }
 
 func EditIssue(ctx context.Context, input *struct {
-	UserID  int64 `path:"userId"`
-	IssueID int64 `path:"issueId"`
-	Body    struct {
+	ID   int64 `path:"id"`
+	Body struct {
 		Title       string `json:"title" maxLength:"72" minLength:"3" required:"true"`
 		Description string `json:"description" maxLength:"65000" minLength:"10" required:"true"`
 	}
 },
 ) (*EditIssueOutput, error) {
 	userCtx := middlewares.MustGetUserFromContext(ctx)
-	if userCtx.ID != input.UserID {
-		return nil, huma.Error403Forbidden("Forbidden")
-	}
 
-	issue, err := db.Client.Issue.UpdateOneID(input.IssueID).
+	issueEntity, err := db.Client.Issue.UpdateOneID(input.ID).
 		Where(issue.HasUserWith(user.IDEQ(userCtx.ID))).
 		SetTitle(input.Body.Title).
 		SetDescription(input.Body.Description).
@@ -51,6 +47,6 @@ func EditIssue(ctx context.Context, input *struct {
 	}
 
 	return &EditIssueOutput{
-		Body: dtos.IssueFrom(issue),
+		Body: dtos.IssueFrom(issueEntity),
 	}, nil
 }

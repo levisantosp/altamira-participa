@@ -1,4 +1,4 @@
-package users
+package issues
 
 import (
 	"fmt"
@@ -32,7 +32,7 @@ func TestEditIssue(t *testing.T) {
 	}
 
 	t.Run("should reject unauthenticated request", func(t *testing.T) {
-		path := fmt.Sprintf("/users/%d/issues/%d", user.ID, issue.ID)
+		path := fmt.Sprintf("/issues/%d", issue.ID)
 		res := api.Put(path)
 
 		if res.Code != http.StatusUnauthorized {
@@ -44,8 +44,8 @@ func TestEditIssue(t *testing.T) {
 		}
 	})
 
-	t.Run("should delete issue", func(t *testing.T) {
-		path := fmt.Sprintf("/users/%d/issues/%d", user.ID, issue.ID)
+	t.Run("should edit issue", func(t *testing.T) {
+		path := fmt.Sprintf("/issues/%d", issue.ID)
 		res := api.Put(path, tests.GetCookie(session.ID), map[string]any{
 			"title":       strings.Repeat("a", 3),
 			"description": strings.Repeat("a", 10),

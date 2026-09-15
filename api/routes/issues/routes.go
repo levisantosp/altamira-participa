@@ -20,4 +20,6 @@ func Routes(api huma.API) {
 		MaxBodyBytes:  16_000_000,
 	}, CreateIssue)
 	huma.Post(group, "/{id}/upvote", UpvoteIssue)
+	huma.Delete(group, "/{id}", DeleteIssue)
+	huma.Put(group, "/{id}", EditIssue)
 }
