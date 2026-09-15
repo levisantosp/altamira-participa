@@ -26,7 +26,7 @@ type TEnv struct {
 var Env TEnv
 
 func LoadEnv(envFile string) {
-	godotenv.Overload(envFile)
+	_ = godotenv.Overload(envFile)
 
 	schema := zog.Struct(zog.Shape{
 		"DatabaseURL":   zog.String().URL().Required(),
