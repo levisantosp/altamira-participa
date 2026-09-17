@@ -33,15 +33,6 @@ func CreateIssue(
 
 	body := input.RawBody.Data()
 
-	fmt.Printf(
-		"File: IsSet=%v Size=%d Filename=%q ContentType=%q File=%v\n",
-		body.File.IsSet,
-		body.File.Size,
-		body.File.Filename,
-		body.File.ContentType,
-		body.File.File,
-	)
-
 	if body.File.IsSet && body.File.Size > 15_000_000 {
 		return nil, huma.Error422UnprocessableEntity(
 			"O tamanho do arquivo deve ter no máximo 15 MB.",
