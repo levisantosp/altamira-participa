@@ -1,11 +1,15 @@
 import type { Metadata } from 'next'
-import { Geist_Mono, Inter } from 'next/font/google'
 import './globals.css'
+import { Geist_Mono, Inter } from 'next/font/google'
 import { Toaster } from 'sonner'
 import { cn } from 'ui/lib/utils'
+import { NavBar } from '@/components/navbar'
 import { AuthProvider } from '../hooks/auth-provider'
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-sans'
+})
 
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
@@ -31,6 +35,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
     >
       <body className='flex flex-col justify-center items-center mt-5 mb-30 md:ml-30 md:mr-30 dark'>
         <AuthProvider>
+          <NavBar />
           {children}
 
           <Toaster
