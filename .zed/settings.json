@@ -1,0 +1,53 @@
+{
+  "formatter": {
+    "language_server": {
+      "name": "oxfmt"
+    }
+  },
+  "languages": {
+    "Make": {
+      "hard_tabs": true
+    },
+    "Go": {
+      "formatter": "language_server"
+    }
+  },
+  "lsp": {
+    "gopls": {
+      "initialization_options": {
+        "gofumpt": true
+      }
+    },
+    "golangci-lint": {
+      "initialization_options": {
+        "command": [
+          "golangci-lint",
+          "run",
+          "--output.json.path",
+          "stdout",
+          "--show-stats=false",
+          "--output.text.path="
+        ]
+      }
+    },
+    "vtsls": {
+      "initialization_options": {
+        "typescript": {
+          "tsdk": "node_modules/typescript/lib"
+        }
+      },
+      "settings": {
+        "javascript": {
+          "updateImportsOnFileMove": {
+            "enabled": "always"
+          }
+        },
+        "typescript": {
+          "updateImportsOnFileMove": {
+            "enabled": "always"
+          }
+        }
+      }
+    }
+  }
+}
